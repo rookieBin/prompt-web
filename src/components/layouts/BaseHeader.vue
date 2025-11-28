@@ -1,73 +1,96 @@
 <script lang="ts" setup>
-import { repository } from '~/../package.json'
-
+import { UserFilled, Plus } from '@element-plus/icons-vue'
 import { toggleDark } from '~/composables'
+
+const handleUserCenter = () => {
+  // 使用编程式导航跳转到个人中心
+  window.location.href = '/profile'
+}
+
+const handleAddPrompt = () => {
+  // 跳转到新增提示词页面
+  window.location.href = '/add-prompt'
+}
 </script>
 
 <template>
-  <el-menu class="el-menu-demo" mode="horizontal" :ellipsis="false" router>
-    <el-menu-item index="/">
-      <div class="flex items-center justify-center gap-2">
-        <div class="text-xl" i-ep-element-plus />
-        <span>Element Plus</span>
+  <div class="prompt-header">
+    <div class="header-content">
+      <!-- 左侧品牌区域 -->
+      <div class="brand-area">
+        <el-button type="text" @click="$router.push('/')" class="brand-btn">
+          <div class="flex items-center gap-2">
+            <div class="text-xl" i-ep-chat-line-round />
+            <span class="brand-text">PromptHub</span>
+          </div>
+        </el-button>
       </div>
-    </el-menu-item>
-    <el-sub-menu index="2">
-      <template #title>
-        Workspace
-      </template>
-      <el-menu-item index="2-1">
-        item one
-      </el-menu-item>
-      <el-menu-item index="2-2">
-        item two
-      </el-menu-item>
-      <el-menu-item index="2-3">
-        item three
-      </el-menu-item>
-      <el-sub-menu index="2-4">
-        <template #title>
-          item four
-        </template>
-        <el-menu-item index="2-4-1">
-          item one
-        </el-menu-item>
-        <el-menu-item index="2-4-2">
-          item two
-        </el-menu-item>
-        <el-menu-item index="2-4-3">
-          item three
-        </el-menu-item>
-      </el-sub-menu>
-    </el-sub-menu>
-    <el-menu-item index="3" disabled>
-      Info
-    </el-menu-item>
-    <el-menu-item index="4">
-      Orders
-    </el-menu-item>
-
-    <el-menu-item h="full" @click="toggleDark()">
-      <button
-        class="w-full cursor-pointer border-none bg-transparent"
-        style="height: var(--ep-menu-item-height)"
-      >
-        <i inline-flex i="dark:ep-moon ep-sunny" />
-      </button>
-    </el-menu-item>
-
-    <el-menu-item h="full">
-      <a class="size-full flex items-center justify-center" :href="repository.url" target="_blank">
-        <div i-ri-github-fill />
-      </a>
-    </el-menu-item>
-  </el-menu>
+      
+      <!-- 右侧功能区域 -->
+      <div class="actions-area">
+        <el-button circle @click="handleAddPrompt" class="action-btn">
+          <el-icon><Plus /></el-icon>
+        </el-button>
+        
+        <el-button circle @click="handleUserCenter" class="action-btn">
+          <el-icon><UserFilled /></el-icon>
+        </el-button>
+        
+        <el-button circle @click="toggleDark()" class="action-btn">
+          <i inline-flex i="dark:ep-moon ep-sunny" />
+        </el-button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <style lang="scss">
-.el-menu-demo {
-  &.ep-menu--horizontal > .ep-menu-item:nth-child(1) {
-    margin-right: auto;
+.prompt-header {
+  background: var(--ep-bg-color);
+  border-bottom: 1px solid var(--ep-border-color);
+  height: var(--ep-menu-item-height);
+  
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+    padding: 0 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  
+  .brand-area {
+    .brand-btn {
+      padding: 8px 12px;
+      height: auto;
+      font-size: 18px;
+      font-weight: 600;
+      
+      .brand-text {
+        color: var(--ep-color-primary);
+        margin-left: 4px;
+      }
+      
+      &:hover {
+        background: var(--ep-fill-color-light);
+      }
+    }
+  }
+  
+  .actions-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    
+    .action-btn {
+      width: 36px;
+      height: 36px;
+      
+      &:hover {
+        background: var(--ep-fill-color-light);
+      }
+    }
   }
 }
 </style>

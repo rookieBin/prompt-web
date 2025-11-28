@@ -4,8 +4,7 @@
 <template>
   <el-config-provider namespace="ep">
     <BaseHeader />
-    <div class="main-container flex">
-      <BaseSide />
+    <div class="main-container">
       <div w="full" py="4">
         <RouterView />
       </div>
@@ -20,6 +19,7 @@
 }
 
 .main-container {
-  height: calc(100vh - var(--ep-menu-item-height) - 4px);
+  min-height: calc(100vh - var(--ep-menu-item-height));
+  background: var(--ep-fill-color-extra-light);
 }
 </style>

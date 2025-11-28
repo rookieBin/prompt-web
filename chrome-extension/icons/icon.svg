@@ -1,0 +1,24 @@
+<svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#409eff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#337ecc;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- 背景圆形 -->
+  <circle cx="64" cy="64" r="56" fill="url(#grad1)" stroke="#ffffff" stroke-width="4"/>
+  
+  <!-- 聊天气泡图标 -->
+  <path d="M32 48c0-8.837 7.163-16 16-16h32c8.837 0 16 7.163 16 16v16c0 8.837-7.163 16-16 16H64l-8 8-8-8H48c-8.837 0-16-7.163-16-16V48z" 
+        fill="#ffffff" opacity="0.9"/>
+  
+  <!-- 文字线条 -->
+  <line x1="44" y1="52" x2="84" y2="52" stroke="#409eff" stroke-width="2" stroke-linecap="round"/>
+  <line x1="44" y1="60" x2="76" y2="60" stroke="#409eff" stroke-width="2" stroke-linecap="round"/>
+  <line x1="44" y1="68" x2="68" y2="68" stroke="#409eff" stroke-width="2" stroke-linecap="round"/>
+  
+  <!-- 星星收藏图标 -->
+  <path d="M88 88l4 8 8-4-8-4-4-8z" fill="#ffd700" opacity="0.8"/>
+  <path d="M92 92l2 4 4-2-4-2-2-4z" fill="#ffd700"/>
+</svg>

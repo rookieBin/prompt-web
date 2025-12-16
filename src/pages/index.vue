@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { Star, View, ChatLineRound, Search } from '@element-plus/icons-vue'
+import { ChatLineRound, Search, Star, View } from '@element-plus/icons-vue'
+import { computed, ref } from 'vue'
 
 interface Prompt {
   id: number
@@ -19,113 +19,113 @@ interface Prompt {
 const prompts = ref<Prompt[]>([
   {
     id: 1,
-    title: '代码优化助手',
-    description: '帮助你分析代码并提供优化建议，提高代码质量和性能。',
-    content: '你是一个专业的代码审查专家，请帮我分析这段代码的问题并给出优化建议...',
-    author: 'DevMaster',
+    title: 'Vue3组件开发助手',
+    description: '帮助你快速开发Vue3组件，提供最佳实践和代码优化建议。',
+    content: '你是一个Vue3开发专家，请帮我设计和实现这个组件，使用Composition API和TypeScript...',
+    author: 'VueMaster',
     avatar: '',
-    category: '编程',
-    tags: ['代码审查', '性能优化', 'JavaScript'],
+    category: '前端',
+    tags: ['Vue3', 'Composition API', 'TypeScript'],
     stars: 234,
     views: 1250,
-    createdAt: '2024-01-15'
+    createdAt: '2024-01-15',
   },
   {
     id: 2,
-    title: '文案创作专家',
-    description: '为你的产品、服务或活动创作引人注目的营销文案。',
-    content: '作为一名资深的营销文案专家，请为我的产品创作一份吸引人的宣传文案...',
-    author: 'CopyWriter',
+    title: 'Node.js API开发专家',
+    description: '设计RESTful API接口，提供后端架构和数据库设计建议。',
+    content: '作为一名资深的Node.js后端开发专家，请帮我设计这个API接口的实现方案...',
+    author: 'BackendPro',
     avatar: '',
-    category: '营销',
-    tags: ['文案创作', '营销', '品牌推广'],
+    category: '后端',
+    tags: ['Node.js', 'Express', 'RESTful API'],
     stars: 189,
     views: 892,
-    createdAt: '2024-01-12'
+    createdAt: '2024-01-12',
   },
   {
     id: 3,
-    title: '英语学习教练',
-    description: '个性化英语学习指导，提升口语、写作和阅读能力。',
-    content: '你是一位专业的英语教学专家，请根据学生的水平制定个性化学习计划...',
-    author: 'EnglishPro',
+    title: '单元测试编写助手',
+    description: '帮助编写高质量的单元测试，提升代码覆盖率和测试可维护性。',
+    content: '你是一位专业的测试工程师，请为这段代码编写完整的单元测试用例...',
+    author: 'TestExpert',
     avatar: '',
-    category: '教育',
-    tags: ['英语学习', '教育', '语言'],
+    category: '测试',
+    tags: ['Jest', '单元测试', 'TDD'],
     stars: 312,
     views: 1680,
-    createdAt: '2024-01-10'
+    createdAt: '2024-01-10',
   },
   {
     id: 4,
-    title: '数据分析师',
-    description: '深入分析数据，发现隐藏的模式和趋势，提供洞察建议。',
-    content: '作为一名专业的数据分析师，请帮我分析这组数据并提供业务洞察...',
+    title: '数据分析与可视化',
+    description: '深入分析大数据，使用Python进行数据处理和可视化展示。',
+    content: '作为一名专业的数据分析师，请帮我分析这组数据并生成可视化报告...',
     author: 'DataGuru',
     avatar: '',
-    category: '数据',
-    tags: ['数据分析', '商业智能', 'Python'],
+    category: '大数据',
+    tags: ['Python', 'Pandas', '数据可视化'],
     stars: 156,
     views: 723,
-    createdAt: '2024-01-08'
+    createdAt: '2024-01-08',
   },
   {
     id: 5,
-    title: 'UI设计顾问',
-    description: '提供专业的界面设计建议，改善用户体验和视觉效果。',
-    content: '作为一位资深的UI/UX设计师，请为我的应用界面提供设计建议...',
-    author: 'DesignExpert',
+    title: 'Git工作流助手',
+    description: '提供Git版本控制最佳实践，解决分支管理和代码合并问题。',
+    content: '作为一位Git专家，请帮我设计合适的分支策略和工作流程...',
+    author: 'GitMaster',
     avatar: '',
-    category: '设计',
-    tags: ['UI设计', '用户体验', 'Figma'],
+    category: '工具',
+    tags: ['Git', '版本控制', '工作流'],
     stars: 278,
     views: 1156,
-    createdAt: '2024-01-05'
+    createdAt: '2024-01-05',
   },
   {
     id: 6,
-    title: '投资理财顾问',
-    description: '提供专业的投资建议和理财规划，帮助你实现财务目标。',
-    content: '作为一名专业的投资顾问，请为我制定一个适合的投资理财计划...',
-    author: 'WealthAdvisor',
+    title: 'React性能优化专家',
+    description: '分析React应用性能瓶颈，提供优化方案和最佳实践建议。',
+    content: '作为一名React性能优化专家，请帮我分析这个组件的性能问题并提供优化方案...',
+    author: 'ReactPro',
     avatar: '',
-    category: '财经',
-    tags: ['投资理财', '财务规划', '股票'],
+    category: '前端',
+    tags: ['React', '性能优化', 'Hooks'],
     stars: 423,
     views: 2134,
-    createdAt: '2024-01-03'
-  }
+    createdAt: '2024-01-03',
+  },
 ])
 
 const searchKeyword = ref('')
-const selectedCategory = ref('')
+const selectedCategory = ref('全部')
 
-const categories = ['全部', '编程', '营销', '教育', '数据', '设计', '财经']
+const categories = ['全部', '前端', '后端', '测试', '大数据', '工具']
 
 const filteredPrompts = computed(() => {
   let filtered = prompts.value
-  
+
   if (selectedCategory.value && selectedCategory.value !== '全部') {
     filtered = filtered.filter(p => p.category === selectedCategory.value)
   }
-  
+
   if (searchKeyword.value) {
     const keyword = searchKeyword.value.toLowerCase()
-    filtered = filtered.filter(p => 
-      p.title.toLowerCase().includes(keyword) ||
-      p.description.toLowerCase().includes(keyword) ||
-      p.tags.some(tag => tag.toLowerCase().includes(keyword))
+    filtered = filtered.filter(p =>
+      p.title.toLowerCase().includes(keyword)
+      || p.description.toLowerCase().includes(keyword)
+      || p.tags.some(tag => tag.toLowerCase().includes(keyword)),
     )
   }
-  
+
   return filtered
 })
 
-const handleUsePrompt = (prompt: Prompt) => {
+function handleUsePrompt(prompt: Prompt) {
   console.log('使用提示词:', prompt)
 }
 
-const handleStarPrompt = (prompt: Prompt) => {
+function handleStarPrompt(prompt: Prompt) {
   prompt.stars += 1
   console.log('收藏提示词:', prompt)
 }
@@ -134,10 +134,14 @@ const handleStarPrompt = (prompt: Prompt) => {
 <template>
   <div class="prompt-plaza">
     <div class="plaza-header">
-      <h1 class="plaza-title">提示词广场</h1>
-      <p class="plaza-subtitle">发现和分享优质的AI提示词，让你的AI助手更加智能</p>
+      <h1 class="plaza-title">
+        提示词广场
+      </h1>
+      <p class="plaza-subtitle">
+        发现和分享优质的AI提示词，让你的AI助手更加智能
+      </p>
     </div>
-    
+
     <!-- 搜索和筛选区域 -->
     <div class="filter-section">
       <div class="search-box">
@@ -152,7 +156,7 @@ const handleStarPrompt = (prompt: Prompt) => {
           </template>
         </el-input>
       </div>
-      
+
       <div class="category-filter">
         <el-radio-group v-model="selectedCategory" size="small">
           <el-radio-button
@@ -166,7 +170,7 @@ const handleStarPrompt = (prompt: Prompt) => {
         </el-radio-group>
       </div>
     </div>
-    
+
     <!-- 提示词卡片网格 -->
     <div class="prompts-grid">
       <el-card
@@ -178,16 +182,24 @@ const handleStarPrompt = (prompt: Prompt) => {
         <template #header>
           <div class="card-header">
             <div class="prompt-info">
-              <h3 class="prompt-title">{{ prompt.title }}</h3>
-              <p class="prompt-author">by {{ prompt.author }}</p>
+              <h3 class="prompt-title">
+                {{ prompt.title }}
+              </h3>
+              <p class="prompt-author">
+                by {{ prompt.author }}
+              </p>
             </div>
-            <el-tag size="small" type="primary">{{ prompt.category }}</el-tag>
+            <el-tag size="small" type="primary">
+              {{ prompt.category }}
+            </el-tag>
           </div>
         </template>
-        
+
         <div class="card-content">
-          <p class="prompt-description">{{ prompt.description }}</p>
-          
+          <p class="prompt-description">
+            {{ prompt.description }}
+          </p>
+
           <div class="prompt-tags">
             <el-tag
               v-for="tag in prompt.tags"
@@ -199,7 +211,7 @@ const handleStarPrompt = (prompt: Prompt) => {
               {{ tag }}
             </el-tag>
           </div>
-          
+
           <div class="prompt-stats">
             <div class="stat-item">
               <el-icon><Star /></el-icon>
@@ -212,7 +224,7 @@ const handleStarPrompt = (prompt: Prompt) => {
             <span class="created-date">{{ prompt.createdAt }}</span>
           </div>
         </div>
-        
+
         <template #footer>
           <div class="card-actions">
             <el-button
@@ -247,14 +259,14 @@ const handleStarPrompt = (prompt: Prompt) => {
 .plaza-header {
   text-align: center;
   margin-bottom: 40px;
-  
+
   .plaza-title {
     font-size: 32px;
     font-weight: 600;
     color: var(--ep-text-color-primary);
     margin-bottom: 12px;
   }
-  
+
   .plaza-subtitle {
     font-size: 16px;
     color: var(--ep-text-color-regular);
@@ -264,20 +276,20 @@ const handleStarPrompt = (prompt: Prompt) => {
 
 .filter-section {
   margin-bottom: 30px;
-  
+
   .search-box {
     margin-bottom: 20px;
-    
+
     :deep(.el-input) {
       max-width: 600px;
       margin: 0 auto;
     }
   }
-  
+
   .category-filter {
     display: flex;
     justify-content: center;
-    
+
     :deep(.el-radio-group) {
       .el-radio-button__inner {
         padding: 8px 16px;
@@ -290,7 +302,7 @@ const handleStarPrompt = (prompt: Prompt) => {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
   gap: 20px;
-  
+
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
@@ -300,24 +312,24 @@ const handleStarPrompt = (prompt: Prompt) => {
   height: 100%;
   border-radius: 12px;
   transition: all 0.3s ease;
-  
+
   &:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
   }
-  
+
   :deep(.el-card__header) {
     padding: 16px 20px;
     border-bottom: 1px solid var(--ep-border-color-lighter);
   }
-  
+
   :deep(.el-card__body) {
     padding: 20px;
     height: calc(100% - 60px);
     display: flex;
     flex-direction: column;
   }
-  
+
   :deep(.el-card__footer) {
     padding: 16px 20px;
     border-top: 1px solid var(--ep-border-color-lighter);
@@ -328,10 +340,10 @@ const handleStarPrompt = (prompt: Prompt) => {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  
+
   .prompt-info {
     flex: 1;
-    
+
     .prompt-title {
       font-size: 18px;
       font-weight: 600;
@@ -339,7 +351,7 @@ const handleStarPrompt = (prompt: Prompt) => {
       margin: 0 0 4px 0;
       line-height: 1.3;
     }
-    
+
     .prompt-author {
       font-size: 13px;
       color: var(--ep-text-color-regular);
@@ -352,7 +364,7 @@ const handleStarPrompt = (prompt: Prompt) => {
   flex: 1;
   display: flex;
   flex-direction: column;
-  
+
   .prompt-description {
     color: var(--ep-text-color-regular);
     font-size: 14px;
@@ -360,31 +372,31 @@ const handleStarPrompt = (prompt: Prompt) => {
     margin: 0 0 16px 0;
     flex: 1;
   }
-  
+
   .prompt-tags {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
     margin-bottom: 16px;
-    
+
     .tag {
       font-size: 12px;
     }
   }
-  
+
   .prompt-stats {
     display: flex;
     align-items: center;
     gap: 12px;
     font-size: 13px;
     color: var(--ep-text-color-regular);
-    
+
     .stat-item {
       display: flex;
       align-items: center;
       gap: 4px;
     }
-    
+
     .created-date {
       margin-left: auto;
       color: var(--ep-text-color-disabled);
@@ -395,10 +407,10 @@ const handleStarPrompt = (prompt: Prompt) => {
 .card-actions {
   display: flex;
   gap: 12px;
-  
+
   .el-button {
     flex: 1;
-    
+
     .el-icon {
       margin-right: 4px;
     }

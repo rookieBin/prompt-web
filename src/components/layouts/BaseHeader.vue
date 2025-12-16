@@ -26,16 +26,23 @@ const handleAddPrompt = () => {
         </el-button>
       </div>
       
+      <!-- 中间导航区域 -->
+      <div class="nav-area">
+        <el-button text @click="$router.push('/')" class="nav-btn">
+          提示词广场
+        </el-button>
+      </div>
+
       <!-- 右侧功能区域 -->
       <div class="actions-area">
         <el-button circle @click="handleAddPrompt" class="action-btn">
           <el-icon><Plus /></el-icon>
         </el-button>
-        
+
         <el-button circle @click="handleUserCenter" class="action-btn">
           <el-icon><UserFilled /></el-icon>
         </el-button>
-        
+
         <el-button circle @click="toggleDark()" class="action-btn">
           <i inline-flex i="dark:ep-moon ep-sunny" />
         </el-button>
@@ -66,27 +73,49 @@ const handleAddPrompt = () => {
       height: auto;
       font-size: 18px;
       font-weight: 600;
-      
+
       .brand-text {
         color: var(--ep-color-primary);
         margin-left: 4px;
       }
-      
+
       &:hover {
         background: var(--ep-fill-color-light);
       }
     }
   }
-  
+
+  .nav-area {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .nav-btn {
+      padding: 8px 16px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--ep-text-color-regular);
+
+      &:hover {
+        color: var(--ep-color-primary);
+        background: var(--ep-fill-color-light);
+      }
+
+      .el-icon {
+        margin-right: 4px;
+      }
+    }
+  }
+
   .actions-area {
     display: flex;
     align-items: center;
     gap: 12px;
-    
+
     .action-btn {
       width: 36px;
       height: 36px;
-      
+
       &:hover {
         background: var(--ep-fill-color-light);
       }

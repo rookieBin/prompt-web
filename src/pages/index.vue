@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ChatLineRound, Search, Star, View } from '@element-plus/icons-vue'
 import { computed, ref } from 'vue'
+import ChatDrawer from '~/components/ChatDrawer.vue'
 
 interface Prompt {
   id: number
@@ -99,6 +100,8 @@ const prompts = ref<Prompt[]>([
 
 const searchKeyword = ref('')
 const selectedCategory = ref('全部')
+const chatDrawerVisible = ref(false)
+const selectedPrompt = ref<Prompt | null>(null)
 
 const categories = ['全部', '前端', '后端', '测试', '大数据', '工具']
 
@@ -122,12 +125,12 @@ const filteredPrompts = computed(() => {
 })
 
 function handleUsePrompt(prompt: Prompt) {
-  console.log('使用提示词:', prompt)
+  selectedPrompt.value = prompt
+  chatDrawerVisible.value = true
 }
 
 function handleStarPrompt(prompt: Prompt) {
   prompt.stars += 1
-  console.log('收藏提示词:', prompt)
 }
 </script>
 
@@ -246,6 +249,12 @@ function handleStarPrompt(prompt: Prompt) {
         </template>
       </el-card>
     </div>
+
+    <ChatDrawer
+      v-model:visible="chatDrawerVisible"
+      :initial-prompt="selectedPrompt?.content"
+      :prompt-title="selectedPrompt?.title"
+    />
   </div>
 </template>
 

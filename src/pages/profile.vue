@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { Edit, Delete, Star, View, ChatLineRound } from '@element-plus/icons-vue'
+import ChatDrawer from '~/components/ChatDrawer.vue'
 
 interface UserPrompt {
   id: number
@@ -69,6 +70,38 @@ const myPrompts = ref<UserPrompt[]>([
 ])
 
 const activeTab = ref('prompts')
+const chatDrawerVisible = ref(false)
+const selectedPrompt = ref<UserPrompt | null>(null)
+
+const apiSettings = ref({
+  apiKey: '',
+  modelProvider: 'openai',
+  customEndpoint: '',
+  customModel: ''
+})
+
+const modelProviders = [
+  { label: 'OpenAI', value: 'openai', endpoint: 'https://api.openai.com/v1' },
+  { label: 'Claude (Anthropic)', value: 'claude', endpoint: 'https://api.anthropic.com/v1' },
+  { label: '通义千问', value: 'qwen', endpoint: 'https://dashscope.aliyuncs.com/api/v1' },
+  { label: '文心一言', value: 'ernie', endpoint: 'https://aip.baidubce.com/rpc/2.0/ai_custom/v1' },
+  { label: '自定义', value: 'custom', endpoint: '' }
+]
+
+const handleSaveApiSettings = () => {
+  localStorage.setItem('apiSettings', JSON.stringify(apiSettings.value))
+  console.log('保存API设置:', apiSettings.value)
+}
+
+// 加载保存的设置
+const loadApiSettings = () => {
+  const saved = localStorage.getItem('apiSettings')
+  if (saved) {
+    apiSettings.value = JSON.parse(saved)
+  }
+}
+
+loadApiSettings()
 
 const handleEditPrompt = (prompt: UserPrompt) => {
   console.log('编辑提示词:', prompt)
@@ -81,6 +114,11 @@ const handleDeletePrompt = (prompt: UserPrompt) => {
 const handleTogglePublic = (prompt: UserPrompt) => {
   prompt.isPublic = !prompt.isPublic
   console.log('切换公开状态:', prompt)
+}
+
+const handleUsePrompt = (prompt: UserPrompt) => {
+  selectedPrompt.value = prompt
+  chatDrawerVisible.value = true
 }
 </script>
 
@@ -206,6 +244,7 @@ const handleTogglePublic = (prompt: UserPrompt) => {
                     <el-button
                       type="primary"
                       size="small"
+                      @click="handleUsePrompt(prompt)"
                     >
                       <el-icon><ChatLineRound /></el-icon>
                       使用
@@ -238,8 +277,66 @@ const handleTogglePublic = (prompt: UserPrompt) => {
             </el-form>
           </div>
         </el-tab-pane>
+
+        <el-tab-pane label="API设置" name="api">
+          <div class="settings-section">
+            <h3 class="section-title">API配置</h3>
+            <el-form label-width="120px">
+              <el-form-item label="模型提供商">
+                <el-select v-model="apiSettings.modelProvider" placeholder="选择模型提供商">
+                  <el-option
+                    v-for="provider in modelProviders"
+                    :key="provider.value"
+                    :label="provider.label"
+                    :value="provider.value"
+                  />
+                </el-select>
+              </el-form-item>
+
+              <el-form-item label="API Key">
+                <el-input
+                  v-model="apiSettings.apiKey"
+                  type="password"
+                  placeholder="请输入您的API Key"
+                  show-password
+                />
+              </el-form-item>
+
+              <el-form-item v-if="apiSettings.modelProvider === 'custom'" label="自定义端点">
+                <el-input
+                  v-model="apiSettings.customEndpoint"
+                  placeholder="https://api.example.com/v1"
+                />
+              </el-form-item>
+
+              <el-form-item v-if="apiSettings.modelProvider === 'custom'" label="模型名称">
+                <el-input
+                  v-model="apiSettings.customModel"
+                  placeholder="gpt-3.5-turbo"
+                />
+              </el-form-item>
+
+              <el-form-item v-else label="API端点">
+                <el-input
+                  :value="modelProviders.find(p => p.value === apiSettings.modelProvider)?.endpoint"
+                  disabled
+                />
+              </el-form-item>
+
+              <el-form-item>
+                <el-button type="primary" @click="handleSaveApiSettings">保存API设置</el-button>
+              </el-form-item>
+            </el-form>
+          </div>
+        </el-tab-pane>
       </el-tabs>
     </div>
+
+    <ChatDrawer
+      v-model:visible="chatDrawerVisible"
+      :initial-prompt="selectedPrompt?.content"
+      :prompt-title="selectedPrompt?.title"
+    />
   </div>
 </template>
 
@@ -443,5 +540,12 @@ const handleTogglePublic = (prompt: UserPrompt) => {
 
 .settings-section {
   max-width: 500px;
+
+  .section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--ep-text-color-primary);
+    margin: 0 0 20px 0;
+  }
 }
 </style>

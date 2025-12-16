@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import type { AIMessageContent, ChatMessagesData, ChatRequestParams, ChatServiceConfig, SSEChunkData } from '@tdesign-vue-next/chat'
 import { Close } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-import type { ChatMessagesData, ChatServiceConfig, ChatRequestParams, SSEChunkData, AIMessageContent } from '@tdesign-vue-next/chat'
+import { computed, ref, watch } from 'vue'
 
 interface Props {
   visible: boolean
@@ -13,7 +13,7 @@ interface Props {
 const props = defineProps<Props>()
 const emit = defineEmits<{
   'update:visible': [value: boolean]
-  close: []
+  'close': []
 }>()
 
 const selectedModel = ref('gpt-3.5-turbo')
@@ -24,39 +24,39 @@ const apiSettings = computed(() => {
   return saved ? JSON.parse(saved) : null
 })
 
-const models = computed(() => {
+const modelOptions = computed(() => {
   const baseModels = [
     { label: 'GPT-3.5 Turbo', value: 'gpt-3.5-turbo' },
     { label: 'GPT-4', value: 'gpt-4' },
     { label: 'Claude 3 Sonnet', value: 'claude-3-sonnet' },
-    { label: 'Claude 3 Opus', value: 'claude-3-opus' }
+    { label: 'Claude 3 Opus', value: 'claude-3-opus' },
   ]
 
   if (apiSettings.value?.modelProvider === 'custom' && apiSettings.value?.customModel) {
     return [
       { label: apiSettings.value.customModel, value: apiSettings.value.customModel },
-      ...baseModels
+      ...baseModels,
     ]
   }
 
   return baseModels
 })
 
-const handleClose = () => {
+function handleClose() {
   emit('update:visible', false)
   emit('close')
 }
 
-const handleNewChat = () => {
+function handleNewChat() {
   messages.value = []
 }
 
-const getProviderEndpoint = (provider: string) => {
+function getProviderEndpoint(provider: string) {
   const providers: Record<string, string> = {
     openai: 'https://api.openai.com/v1',
     claude: 'https://api.anthropic.com/v1',
     qwen: 'https://dashscope.aliyuncs.com/api/v1',
-    ernie: 'https://aip.baidubce.com/rpc/2.0/ai_custom/v1'
+    ernie: 'https://aip.baidubce.com/rpc/2.0/ai_custom/v1',
   }
   return providers[provider] || ''
 }
@@ -89,25 +89,25 @@ const chatServiceConfig = computed<ChatServiceConfig>(() => {
             : m.content
                 .filter(c => c.type === 'text' || c.type === 'markdown')
                 .map(c => c.data)
-                .join('')
+                .join(''),
         }))
         .filter(m => m.content)
 
       allMessages.push({
         role: 'user',
-        content: innerParams.prompt
+        content: innerParams.prompt,
       })
 
       return {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiSettings.value.apiKey}`
+          'Authorization': `Bearer ${apiSettings.value.apiKey}`,
         },
         body: JSON.stringify({
           model: modelName,
           messages: allMessages,
-          stream: true
-        })
+          stream: true,
+        }),
       }
     },
     onMessage: (chunk: SSEChunkData): AIMessageContent => {
@@ -117,17 +117,19 @@ const chatServiceConfig = computed<ChatServiceConfig>(() => {
         // 处理不同类型的数据
         if (typeof chunk.data === 'string') {
           dataStr = chunk.data
-        } else if (chunk.data && typeof chunk.data === 'object') {
+        }
+        else if (chunk.data && typeof chunk.data === 'object') {
           // 如果是对象，尝试提取内容
           const data = chunk.data as any
           if (data.choices?.[0]?.delta?.content) {
             return {
               type: 'text',
-              data: data.choices[0].delta.content
+              data: data.choices[0].delta.content,
             }
           }
           return { type: 'text', data: '' }
-        } else {
+        }
+        else {
           return { type: 'text', data: '' }
         }
 
@@ -143,11 +145,12 @@ const chatServiceConfig = computed<ChatServiceConfig>(() => {
           if (content) {
             return {
               type: 'text',
-              data: content
+              data: content,
             }
           }
         }
-      } catch (e) {
+      }
+      catch (e) {
         console.error('解析响应失败:', e, chunk)
       }
       return { type: 'text', data: '' }
@@ -158,27 +161,34 @@ const chatServiceConfig = computed<ChatServiceConfig>(() => {
     },
     onComplete: () => {
       console.log('对话完成')
-    }
+    },
   }
 })
 
-const messageProps = (msg: ChatMessagesData) => {
+function messageProps(msg: ChatMessagesData) {
   if (msg.role === 'user') {
     return {
       variant: 'base',
-      placement: 'right'
+      placement: 'right',
     }
   }
   if (msg.role === 'assistant') {
     return {
-      placement: 'left'
+      placement: 'left',
+      chatContentProps: {
+        thinking: {
+          maxHeight: 200,
+          layout: 'block',
+          collapsed: true,
+        },
+      },
     }
   }
   return {}
 }
 
 const senderProps = {
-  placeholder: '提问或输入 / 使用捷径，Enter 发送，Shift+Enter 换行'
+  placeholder: '提问或输入 / 使用捷径，Enter 发送，Shift+Enter 换行',
 }
 
 // 监听抽屉打开
@@ -192,19 +202,17 @@ watch(() => props.visible, (newVal) => {
           {
             type: 'text',
             status: 'complete',
-            data: `你好，我是 ${props.promptTitle || 'AI 助手'}。我可以帮助你使用提示词进行对话。`
+            data: `你好，我是 ${props.promptTitle || 'AI 助手'}。`,
           },
           {
-            type: 'suggestion',
+            type: 'thinking',
             status: 'complete',
-            data: [
-              {
-                title: '使用提示词',
-                prompt: props.initialPrompt
-              }
-            ]
-          }
-        ]
+            data: {
+              title: '当前提示词内容',
+              text: props.initialPrompt,
+            },
+          },
+        ],
       }]
     }
     if (apiSettings.value?.modelProvider === 'custom' && apiSettings.value?.customModel) {
@@ -225,17 +233,6 @@ watch(() => props.visible, (newVal) => {
       <div class="drawer-header">
         <h3>{{ promptTitle || 'AI 助手' }}</h3>
         <div class="header-actions">
-          <el-select v-model="selectedModel" size="small" placeholder="选择模型" style="width: 180px; margin-right: 12px;">
-            <el-option
-              v-for="model in models"
-              :key="model.value"
-              :label="model.label"
-              :value="model.value"
-            />
-          </el-select>
-          <el-button circle size="small" @click="handleNewChat">
-            <el-icon><Close /></el-icon>
-          </el-button>
           <el-button circle size="small" @click="handleClose">
             <el-icon><Close /></el-icon>
           </el-button>
@@ -249,7 +246,27 @@ watch(() => props.visible, (newVal) => {
         :message-props="messageProps"
         :sender-props="senderProps"
         :chat-service-config="chatServiceConfig"
-      />
+      >
+        <template #sender-footer-prefix>
+          <div class="model-select">
+            <el-tooltip content="切换模型" placement="top">
+              <el-select
+                v-model="selectedModel"
+                size="small"
+                placeholder="选择模型"
+                style="width: 200px;"
+              >
+                <el-option
+                  v-for="model in modelOptions"
+                  :key="model.value"
+                  :label="model.label"
+                  :value="model.value"
+                />
+              </el-select>
+            </el-tooltip>
+          </div>
+        </template>
+      </t-chatbot>
     </div>
   </el-drawer>
 </template>
@@ -279,6 +296,15 @@ watch(() => props.visible, (newVal) => {
 
   :deep(.t-chatbot) {
     height: 100%;
+  }
+
+  .model-select {
+    display: flex;
+    align-items: center;
+
+    :deep(.el-select) {
+      width: 150px;
+    }
   }
 }
 </style>

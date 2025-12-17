@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { UserFilled, Plus } from '@element-plus/icons-vue'
-import { toggleDark } from '~/composables'
 
 const handleUserCenter = () => {
   // 使用编程式导航跳转到个人中心
@@ -41,10 +40,6 @@ const handleAddPrompt = () => {
 
         <el-button circle @click="handleUserCenter" class="action-btn">
           <el-icon><UserFilled /></el-icon>
-        </el-button>
-
-        <el-button circle @click="toggleDark()" class="action-btn">
-          <i inline-flex i="dark:ep-moon ep-sunny" />
         </el-button>
       </div>
     </div>

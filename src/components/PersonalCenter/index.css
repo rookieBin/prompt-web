@@ -1,0 +1,55 @@
+.personal-center-modal :global(.ant-modal-content) {
+  background: var(--bg-container);
+}
+
+.personal-center-modal :global(.ant-modal-header) {
+  background: var(--bg-container);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.personal-center-modal :global(.ant-modal-title) {
+  color: var(--text-color);
+}
+
+.personal-center-modal :global(.ant-modal-close) {
+  color: var(--text-color);
+}
+
+.personal-center-content {
+  color: var(--text-color);
+}
+
+.section {
+  margin-bottom: 32px;
+}
+
+.section h3 {
+  color: var(--text-color);
+  margin-bottom: 16px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.personal-center-modal :global(.ant-form-item-label > label) {
+  color: var(--text-color);
+}
+
+.personal-center-modal :global(.ant-input),
+.personal-center-modal :global(.ant-input-password),
+.personal-center-modal :global(.ant-input-number) {
+  background: var(--bg-base);
+  border-color: var(--border-color);
+  color: var(--text-color);
+}
+
+.personal-center-modal :global(.ant-input):focus,
+.personal-center-modal :global(.ant-input-password):focus,
+.personal-center-modal :global(.ant-input-number):focus {
+  border-color: #177ddc;
+}
+
+.personal-center-modal :global(.ant-input)::placeholder,
+.personal-center-modal :global(.ant-input-password)::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.5;
+}

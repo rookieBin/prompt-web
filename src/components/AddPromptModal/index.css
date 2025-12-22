@@ -1,0 +1,43 @@
+.add-prompt-modal :global(.ant-modal-content) {
+  background: var(--bg-container);
+}
+
+.add-prompt-modal :global(.ant-modal-header) {
+  background: var(--bg-container);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.add-prompt-modal :global(.ant-modal-title) {
+  color: var(--text-color);
+}
+
+.add-prompt-modal :global(.ant-modal-close) {
+  color: var(--text-color);
+}
+
+.add-prompt-modal :global(.ant-form-item-label > label) {
+  color: var(--text-color);
+}
+
+.add-prompt-modal :global(.ant-input),
+.add-prompt-modal :global(.ant-input-number),
+.add-prompt-modal :global(.ant-input-password),
+.add-prompt-modal :global(textarea.ant-input) {
+  background: var(--bg-base);
+  border-color: var(--border-color);
+  color: var(--text-color);
+}
+
+.add-prompt-modal :global(.ant-input):focus,
+.add-prompt-modal :global(.ant-input-number):focus,
+.add-prompt-modal :global(.ant-input-password):focus,
+.add-prompt-modal :global(textarea.ant-input):focus {
+  border-color: #177ddc;
+}
+
+.add-prompt-modal :global(.ant-input)::placeholder,
+.add-prompt-modal :global(.ant-input-password)::placeholder,
+.add-prompt-modal :global(textarea.ant-input)::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.5;
+}

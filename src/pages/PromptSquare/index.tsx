@@ -11,7 +11,7 @@ import { promptApi } from '../../api';
 import ChatModal from '../../components/ChatModal';
 import AddPromptModal from '../../components/AddPromptModal';
 import './index.css';
-
+import AiButton from '@/components/AiButton';
 const { Search } = Input;
 
 export default function PromptSquare() {
@@ -91,12 +91,11 @@ export default function PromptSquare() {
             onSearch={setSearchKeyword}
             onChange={(e) => !e.target.value && setSearchKeyword('')}
           />
-          <Button 
-            type="primary" 
+          <AiButton 
             onClick={() => setAddModalVisible(true)}
           >
             添加提示词
-          </Button>
+          </AiButton>
         </Space>
       </div>
 

@@ -1,17 +1,13 @@
 import { useState, useEffect } from 'react';
-import { Card, Tag, Button, Space, message, Pagination, Input } from 'antd';
-import { 
-  EyeOutlined, 
-  HeartOutlined, 
-  HeartFilled,
-  PlayCircleOutlined,
-} from '@ant-design/icons';
+import { Space, message, Pagination, Input } from 'antd';
 import type { Prompt } from '../../types';
 import { promptApi } from '../../api';
 import ChatModal from '../../components/ChatModal';
 import AddPromptModal from '../../components/AddPromptModal';
-import './index.css';
+import PromptCard from '../../components/PromptCard';
 import AiButton from '@/components/AiButton';
+import './index.css';
+
 const { Search } = Input;
 
 export default function PromptSquare() {
@@ -38,10 +34,10 @@ export default function PromptSquare() {
       });
       if (response.code === 200) {
         let filteredPrompts = response.data.list;
-        
+
         // 简单的搜索过滤
         if (searchKeyword) {
-          filteredPrompts = filteredPrompts.filter(p => 
+          filteredPrompts = filteredPrompts.filter(p =>
             p.title.toLowerCase().includes(searchKeyword.toLowerCase()) ||
             p.description.toLowerCase().includes(searchKeyword.toLowerCase()) ||
             p.tags.some(tag => tag.toLowerCase().includes(searchKeyword.toLowerCase()))
@@ -91,7 +87,7 @@ export default function PromptSquare() {
             onSearch={setSearchKeyword}
             onChange={(e) => !e.target.value && setSearchKeyword('')}
           />
-          <AiButton 
+          <AiButton
             onClick={() => setAddModalVisible(true)}
           >
             添加提示词
@@ -101,50 +97,14 @@ export default function PromptSquare() {
 
       <div className="prompt-grid">
         {prompts.map(prompt => (
-          <Card
+          <PromptCard
             key={prompt.id}
-            className="prompt-card"
+            prompt={prompt}
             loading={loading}
-            hoverable
-            actions={[
-              <Button
-                type="text"
-                icon={<PlayCircleOutlined />}
-                onClick={() => handleUse(prompt)}
-              >
-                使用
-              </Button>,
-              <Button
-                type="text"
-                icon={isFavorited(prompt.id) ? <HeartFilled /> : <HeartOutlined />}
-                onClick={() => handleFavorite(prompt)}
-                style={{ color: isFavorited(prompt.id) ? '#ff4d4f' : undefined }}
-              >
-                收藏
-              </Button>,
-            ]}
-          >
-            <div className="prompt-card-content">
-              <h3 className="prompt-title">{prompt.title}</h3>
-              <p className="prompt-author">作者: {prompt.author}</p>
-              <p className="prompt-description">{prompt.description}</p>
-              <div className="prompt-tags">
-                {prompt.tags.map(tag => (
-                  <Tag key={tag} color="blue">{tag}</Tag>
-                ))}
-              </div>
-              <div className="prompt-stats">
-                <Space>
-                  <span>
-                    <EyeOutlined /> {prompt.viewCount}
-                  </span>
-                  <span>
-                    <HeartOutlined /> {prompt.favoriteCount}
-                  </span>
-                </Space>
-              </div>
-            </div>
-          </Card>
+            isFavorited={isFavorited(prompt.id)}
+            onUse={handleUse}
+            onFavorite={handleFavorite}
+          />
         ))}
       </div>
 
@@ -183,4 +143,3 @@ export default function PromptSquare() {
     </div>
   );
 }
-

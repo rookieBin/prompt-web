@@ -68,13 +68,6 @@ export default function AppLayout({ children }: LayoutProps) {
         <div className="header-left">
           <Button
             type="text"
-            icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-            onClick={() => setCollapsed(!collapsed)}
-            style={{ marginRight: 16 }}
-            className="header-button"
-          />
-          <Button
-            type="text"
             icon={<HomeOutlined />}
             onClick={() => navigate('/')}
             className="header-button"
@@ -111,7 +104,7 @@ export default function AppLayout({ children }: LayoutProps) {
         </div>
       </Header>
       <Layout>
-        <Sider 
+        {/* <Sider 
           collapsible 
           collapsed={collapsed} 
           onCollapse={setCollapsed}
@@ -133,7 +126,7 @@ export default function AppLayout({ children }: LayoutProps) {
               </Button>
             ))}
           </div>
-        </Sider>
+        </Sider> */}
         <Content className="app-content">
           {children}
         </Content>

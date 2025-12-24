@@ -1,9 +1,11 @@
 .personal-center-modal :global(.ant-modal-content) {
   background: var(--bg-container);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
 }
 
 .personal-center-modal :global(.ant-modal-header) {
-  background: var(--bg-container);
+  background: transparent;
   border-bottom: 1px solid var(--border-color);
 }
 
@@ -13,6 +15,11 @@
 
 .personal-center-modal :global(.ant-modal-close) {
   color: var(--text-color);
+  transition: color 0.3s ease;
+}
+
+.personal-center-modal :global(.ant-modal-close:hover) {
+  color: var(--ai-purple);
 }
 
 .personal-center-content {
@@ -27,7 +34,12 @@
   color: var(--text-color);
   margin-bottom: 16px;
   font-size: 16px;
-  font-weight: 500;
+  font-weight: 600;
+  background: var(--ai-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  display: inline-block;
 }
 
 .personal-center-modal :global(.ant-form-item-label > label) {
@@ -40,12 +52,18 @@
   background: var(--bg-base);
   border-color: var(--border-color);
   color: var(--text-color);
+  border-radius: 8px;
+  transition: all 0.3s ease;
 }
 
 .personal-center-modal :global(.ant-input):focus,
 .personal-center-modal :global(.ant-input-password):focus,
-.personal-center-modal :global(.ant-input-number):focus {
-  border-color: #177ddc;
+.personal-center-modal :global(.ant-input-number):focus,
+.personal-center-modal :global(.ant-input):hover,
+.personal-center-modal :global(.ant-input-password):hover,
+.personal-center-modal :global(.ant-input-number):hover {
+  border-color: var(--ai-purple);
+  box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.1);
 }
 
 .personal-center-modal :global(.ant-input)::placeholder,

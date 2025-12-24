@@ -1,5 +1,6 @@
 .ai-button.ant-btn-primary:not(:disabled):not(.ant-btn-dangerous) {
   position: relative;
+  border-radius: 8px;
 }
 
 .ai-button.ant-btn-primary:not(:disabled):not(.ant-btn-dangerous) > span {
@@ -8,20 +9,14 @@
 
 .ai-button.ant-btn-primary:not(:disabled):not(.ant-btn-dangerous)::before {
   content: '';
-  background: linear-gradient(
-    278deg,
-    rgb(233, 69, 255),
-    rgb(166, 71, 255) 30%,
-    rgb(107, 97, 255) 60%,
-    rgb(46, 140, 255)
-  );
+  background: var(--ai-gradient);
   position: absolute;
   inset: -1px;
   opacity: 1;
-  transition: all 0.3s;
+  transition: all 0.3s ease;
   border-radius: inherit;
 }
 
 .ai-button.ant-btn-primary:not(:disabled):not(.ant-btn-dangerous):hover::before {
-  opacity: 0;
+  background: var(--ai-gradient-hover);
 }

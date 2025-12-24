@@ -1,9 +1,11 @@
 .chat-modal :global(.ant-modal-content) {
   background: var(--bg-container);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
 }
 
 .chat-modal :global(.ant-modal-header) {
-  background: var(--bg-container);
+  background: transparent;
   border-bottom: 1px solid var(--border-color);
 }
 
@@ -13,6 +15,11 @@
 
 .chat-modal :global(.ant-modal-close) {
   color: var(--text-color);
+  transition: color 0.3s ease;
+}
+
+.chat-modal :global(.ant-modal-close:hover) {
+  color: var(--ai-purple);
 }
 
 .chat-modal-content {
@@ -26,7 +33,7 @@
 .prompt-collapse :global(.ant-collapse-header) {
   color: var(--text-color) !important;
   background: var(--bg-base);
-  border-radius: 6px;
+  border-radius: 8px;
 }
 
 .prompt-collapse :global(.ant-collapse-content) {
@@ -37,7 +44,7 @@
 .prompt-content {
   padding: 12px;
   background: var(--bg-hover);
-  border-radius: 4px;
+  border-radius: 8px;
   max-height: 300px;
   overflow-y: auto;
 }
@@ -47,8 +54,9 @@
   flex-direction: column;
   height: 600px;
   background: var(--bg-base);
-  border-radius: 8px;
+  border-radius: 12px;
   overflow: hidden;
+  border: 1px solid var(--border-color);
 }
 
 .chat-messages {
@@ -86,12 +94,14 @@
   background: var(--bg-container);
   color: var(--text-color);
   padding: 12px 16px;
-  border-radius: 8px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
 }
 
 .chat-message-user :global(.ant-x-bubble) {
-  background: #177ddc;
+  background: var(--ai-gradient);
   color: #fff;
+  border: none;
 }
 
 /* Sender组件样式 */
@@ -103,10 +113,13 @@
   background: var(--bg-base);
   border-color: var(--border-color);
   color: var(--text-color);
+  border-radius: 8px;
+  transition: all 0.3s ease;
 }
 
 .chat-sender :global(.ant-input):focus {
-  border-color: #177ddc;
+  border-color: var(--ai-purple);
+  box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.1);
 }
 
 .chat-sender :global(.ant-input)::placeholder {
@@ -166,6 +179,12 @@
 .chat-sender :global(.ant-x-sender-actions button) {
   color: var(--text-color);
   flex-shrink: 0;
+  transition: color 0.3s ease;
+}
+
+.chat-sender :global(.ant-x-sender-footer button:hover),
+.chat-sender :global(.ant-x-sender-actions button:hover) {
+  color: var(--ai-purple);
 }
 
 /* 确保发送按钮可见 */

@@ -1,19 +1,54 @@
 .app-layout {
   background: var(--bg-base);
+  min-height: 100vh;
 }
 
 .app-header {
   position: sticky;
   top: 0;
   z-index: 1000;
-  background: var(--bg-container);
+  background: var(--header-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   padding: 0 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid var(--border-color);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-bottom: none;
 }
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: var(--header-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 0 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  /* 关键 */
+  border-bottom: none;
+}
+
+.app-header::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(90deg,
+      #fe8aff 0%,
+      rgb(111, 179, 226) 66%,
+      rgb(108, 87, 255) 100%);
+  opacity: 0.3;
+}
+
+
 
 .header-left {
   display: flex;
@@ -26,24 +61,25 @@
 }
 
 .app-title {
-  color: var(--text-color);
-  font-size: 18px;
-  font-weight: 500;
-  font-style: italic;
-  font-family: 'Pacifico', cursive;
+  font-size: 20px;
+  font-weight: 700;
+  font-style: normal;
+  font-family: -apple-system;
+  background: var(--ai-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .header-button {
   color: var(--text-color) !important;
+  transition: all 0.3s ease;
 }
 
-.header-button:hover {
-  color: var(--text-color) !important;
-  background: var(--hover-bg) !important;
-}
 
 .app-sider {
   background: var(--bg-container) !important;
+  border-right: 1px solid var(--border-color);
 }
 
 .sider-menu {
@@ -55,12 +91,18 @@
   text-align: left;
   height: 40px;
   margin-bottom: 8px;
-  border-radius: 6px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
 }
 
 .sider-menu-item:hover {
   background: var(--hover-bg) !important;
-  color: var(--text-color) !important;
+  color: var(--ai-purple) !important;
+}
+
+.sider-menu-item.active {
+  background: var(--ai-gradient) !important;
+  color: #fff !important;
 }
 
 .app-content {
@@ -68,4 +110,3 @@
   padding: 24px;
   min-height: calc(100vh - 64px);
 }
-

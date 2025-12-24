@@ -3,12 +3,10 @@ import { Layout, Avatar, Dropdown, Button, Tooltip } from 'antd';
 import type { MenuProps } from 'antd';
 import { 
   HomeOutlined, 
-  PlusOutlined, 
   UserOutlined,
-  MenuFoldOutlined,
-  MenuUnfoldOutlined,
   SunOutlined,
   MoonOutlined,
+  BulbOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -18,14 +16,13 @@ import PersonalCenter from '../PersonalCenter';
 import AddPromptModal from '../AddPromptModal';
 import './index.css';
 
-const { Header, Content, Sider } = Layout;
+const { Header, Content } = Layout;
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
 export default function AppLayout({ children }: LayoutProps) {
-  const [collapsed, setCollapsed] = useState(true);
   const [user, setUser] = useState<User | null>(null);
   const [personalCenterVisible, setPersonalCenterVisible] = useState(false);
   const [addPromptVisible, setAddPromptVisible] = useState(false);
@@ -51,17 +48,6 @@ export default function AppLayout({ children }: LayoutProps) {
     },
   ];
 
-  const siderMenuItems = [
-    {
-      key: 'add-prompt',
-      icon: <PlusOutlined />,
-      label: '添加提示词',
-      onClick: () => {
-        setAddPromptVisible(true);
-      },
-    },
-  ];
-
   return (
     <Layout className="app-layout" style={{ minHeight: '100vh' }}>
       <Header className="app-header">
@@ -74,6 +60,16 @@ export default function AppLayout({ children }: LayoutProps) {
           >
             <span style={{ marginLeft: 8 }}>首页</span>
           </Button>
+          <Tooltip title="提示词优化">
+            <Button
+              type="text"
+              icon={<BulbOutlined />}
+              onClick={() => navigate('/optimizer')}
+              className="header-button"
+            >
+              <span style={{ marginLeft: 8 }}>提示词优化</span>
+            </Button>
+          </Tooltip>
         </div>
         <div className="header-right">
           <span className="app-title">WePrompt</span>
@@ -104,29 +100,6 @@ export default function AppLayout({ children }: LayoutProps) {
         </div>
       </Header>
       <Layout>
-        {/* <Sider 
-          collapsible 
-          collapsed={collapsed} 
-          onCollapse={setCollapsed}
-          width={200}
-          theme="dark"
-          className="app-sider"
-        >
-          <div className="sider-menu">
-            {siderMenuItems.map(item => (
-              <Button
-                key={item.key}
-                type="text"
-                icon={item.icon}
-                onClick={item.onClick}
-                className="sider-menu-item"
-                block
-              >
-                {!collapsed && <span style={{ marginLeft: 8 }}>{item.label}</span>}
-              </Button>
-            ))}
-          </div>
-        </Sider> */}
         <Content className="app-content">
           {children}
         </Content>

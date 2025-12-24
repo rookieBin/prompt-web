@@ -1,7 +1,8 @@
 .personal-center-modal :global(.ant-modal-content) {
   background: var(--bg-container);
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
+  border: none;
+  border-radius: 0;
+  height: 100vh;
 }
 
 .personal-center-modal :global(.ant-modal-header) {
@@ -22,12 +23,58 @@
   color: var(--ai-purple);
 }
 
-.personal-center-content {
+.personal-center-layout {
+  display: flex;
+  height: 100%;
+}
+
+.sidebar {
+  ul{
+    height: 100%;
+    border-radius: 10px;
+  }
+  width: 200px;
+  border-right: 1px solid var(--border-color);
+  background: var(--bg-container);
+  padding: 16px 0;
+  margin-right: 50px;
+}
+
+.sidebar :global(.ant-menu) {
+  background: transparent;
+  border: none;
+}
+
+.sidebar :global(.ant-menu-item) {
+  color: var(--text-color);
+  margin: 4px 12px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.sidebar :global(.ant-menu-item-selected) {
+  background: var(--ai-gradient);
+  color: white;
+}
+
+.sidebar :global(.ant-menu-item:hover:not(.ant-menu-item-selected)) {
+  background: var(--bg-base);
+  color: var(--ai-purple);
+}
+
+.sidebar :global(.ant-menu-item-icon) {
+  color: inherit;
+}
+
+.content {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
   color: var(--text-color);
 }
 
 .section {
-  margin-bottom: 32px;
+  max-width: 600px;
 }
 
 .section h3 {

@@ -3,6 +3,7 @@ import { ConfigProvider, theme } from 'antd';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import AppLayout from './components/Layout';
 import PromptSquare from './pages/PromptSquare';
+import PromptOptimizer from './pages/PromptOptimizer';
 import './App.css';
 
 function AppContent() {
@@ -34,6 +35,7 @@ function AppContent() {
         <AppLayout>
           <Routes>
             <Route path="/" element={<PromptSquare />} />
+            <Route path="/optimizer" element={<PromptOptimizer />} />
           </Routes>
         </AppLayout>
       </BrowserRouter>

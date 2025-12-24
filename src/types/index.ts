@@ -28,6 +28,7 @@ export interface AIConfig {
   model: string;
   temperature?: number;
   maxTokens?: number;
+  difyApiKey?: string;
 }
 
 // 消息类型（用于AI对话）

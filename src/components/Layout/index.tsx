@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Layout, Avatar, Dropdown, Button, Tooltip } from 'antd';
 import type { MenuProps } from 'antd';
-import { 
-  HomeOutlined, 
+import {
+  HomeOutlined,
   UserOutlined,
   SunOutlined,
   MoonOutlined,
   BulbOutlined,
+  ToolOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -68,6 +69,16 @@ export default function AppLayout({ children }: LayoutProps) {
               className="header-button"
             >
               <span style={{ marginLeft: 8 }}>提示词优化</span>
+            </Button>
+          </Tooltip>
+          <Tooltip title="提示词工坊">
+            <Button
+              type="text"
+              icon={<ToolOutlined />}
+              onClick={() => navigate('/workshop')}
+              className="header-button"
+            >
+              <span style={{ marginLeft: 8 }}>提示词工坊</span>
             </Button>
           </Tooltip>
         </div>

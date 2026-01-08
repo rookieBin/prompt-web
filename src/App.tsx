@@ -4,6 +4,7 @@ import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import AppLayout from './components/Layout';
 import PromptSquare from './pages/PromptSquare';
 import PromptOptimizer from './pages/PromptOptimizer';
+import PromptWorkshop from './pages/PromptWorkshop';
 import './App.css';
 
 function AppContent() {
@@ -36,6 +37,7 @@ function AppContent() {
           <Routes>
             <Route path="/" element={<PromptSquare />} />
             <Route path="/optimizer" element={<PromptOptimizer />} />
+            <Route path="/workshop" element={<PromptWorkshop />} />
           </Routes>
         </AppLayout>
       </BrowserRouter>

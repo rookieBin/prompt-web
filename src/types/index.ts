@@ -66,3 +66,43 @@ export interface PaginationResponse<T> {
   pageSize: number;
 }
 
+// ========== 提示词工坊相关类型 ==========
+
+// 分类颜色类型
+export type CategoryColor = 'blue' | 'amber' | 'rose' | 'emerald' | 'violet' | 'slate';
+
+// 词库分类
+export interface Category {
+  id: string;
+  label: string;
+  color: CategoryColor;
+}
+
+// 词库
+export interface Bank {
+  key: string;           // 变量名，如 "role"
+  label: string;         // 显示名称，如 "角色"
+  category: string;      // 分类ID
+  options: string[];     // 选项列表
+}
+
+// 工坊模板
+export interface WorkshopTemplate {
+  id: string;
+  name: string;
+  content: string;                      // 包含 {{variable}} 的模板内容
+  selections: Record<string, string>;   // 变量选择值，key为 "变量名-索引"
+  createdAt: string;
+  updatedAt: string;
+}
+
+// 分类样式配置
+export interface CategoryStyle {
+  text: string;        // 文字颜色类
+  bg: string;          // 背景色类
+  border: string;      // 边框色类
+  hoverBg: string;     // 悬停背景类
+  lightBg: string;     // 浅色背景
+  darkBg: string;      // 深色背景（暗色模式）
+  darkText: string;    // 深色模式文字
+}

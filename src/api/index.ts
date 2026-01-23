@@ -297,7 +297,7 @@ export const chatApi = {
           if (hasImages && isVisionModel) {
             // Vision模型需要特殊格式
             const content: any[] = [];
-            
+
             // 添加文本内容
             if (msg.content) {
               content.push({
@@ -344,7 +344,11 @@ export const chatApi = {
         requestBody.max_tokens = config.maxTokens;
       }
 
-      const response = await fetch(`${config.baseURL}/chat/completions`, {
+      // 开发环境使用代理，生产环境直接调用
+      const isDev = import.meta.env.DEV;
+      const apiUrl = isDev ? '/api-proxy/v1/chat/completions' : `${config.baseURL}/chat/completions`;
+
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${config.apiKey}`,

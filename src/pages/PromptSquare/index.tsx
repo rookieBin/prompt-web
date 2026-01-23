@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Space, message, Pagination, Input } from 'antd';
+import { Space, message, Pagination, Input, Popover } from 'antd';
+import { EyeOutlined, HeartOutlined } from '@ant-design/icons';
 import type { Prompt } from '../../types';
 import { promptApi } from '../../api';
 import ChatModal from '../../components/ChatModal';
@@ -10,8 +11,20 @@ import './index.css';
 
 const { Search } = Input;
 
+const CATEGORIES = [
+  { key: 'all', label: '全部' },
+  { key: 'programming', label: '编程开发' },
+  { key: 'writing', label: '文案写作' },
+  { key: 'business', label: '商务办公' },
+  { key: 'design', label: '设计创意' },
+  { key: 'data', label: '数据分析' },
+  { key: 'other', label: '其他' },
+];
+
 export default function PromptSquare() {
   const [prompts, setPrompts] = useState<Prompt[]>([]);
+  const [recommendedPrompts, setRecommendedPrompts] = useState<Prompt[]>([]);
+  const [hotPrompts, setHotPrompts] = useState<Prompt[]>([]);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize] = useState(12);
@@ -20,10 +33,41 @@ export default function PromptSquare() {
   const [chatModalVisible, setChatModalVisible] = useState(false);
   const [addModalVisible, setAddModalVisible] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState('');
+  const [activeCategory, setActiveCategory] = useState('all');
+  const [popoverVisible, setPopoverVisible] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    loadRecommendedPrompts();
+    loadHotPrompts();
+  }, []);
 
   useEffect(() => {
     loadPrompts();
-  }, [currentPage, searchKeyword]);
+  }, [currentPage, searchKeyword, activeCategory]);
+
+  const loadRecommendedPrompts = async () => {
+    try {
+      const response = await promptApi.getRecommendedPrompts();
+      if (response.code === 200) {
+        console.log('推荐提示词加载成功:', response.data.length, '条');
+        setRecommendedPrompts(response.data);
+      }
+    } catch (error) {
+      console.error('加载推荐提示词失败', error);
+    }
+  };
+
+  const loadHotPrompts = async () => {
+    try {
+      const response = await promptApi.getHotPrompts();
+      if (response.code === 200) {
+        console.log('热门提示词加载成功:', response.data.length, '条');
+        setHotPrompts(response.data);
+      }
+    } catch (error) {
+      console.error('加载热门提示词失败', error);
+    }
+  };
 
   const loadPrompts = async () => {
     setLoading(true);
@@ -31,20 +75,11 @@ export default function PromptSquare() {
       const response = await promptApi.getPrompts({
         page: currentPage,
         pageSize,
+        category: activeCategory === 'all' ? undefined : activeCategory,
+        keyword: searchKeyword || undefined,
       });
       if (response.code === 200) {
-        let filteredPrompts = response.data.list;
-
-        // 简单的搜索过滤
-        if (searchKeyword) {
-          filteredPrompts = filteredPrompts.filter(p =>
-            p.title.toLowerCase().includes(searchKeyword.toLowerCase()) ||
-            p.description.toLowerCase().includes(searchKeyword.toLowerCase()) ||
-            p.tags.some(tag => tag.toLowerCase().includes(searchKeyword.toLowerCase()))
-          );
-        }
-
-        setPrompts(filteredPrompts);
+        setPrompts(response.data.list);
         setTotal(response.data.total);
       }
     } catch (error) {
@@ -95,33 +130,168 @@ export default function PromptSquare() {
         </Space>
       </div>
 
-      <div className="prompt-grid">
-        {prompts.map(prompt => (
-          <PromptCard
-            key={prompt.id}
-            prompt={prompt}
-            loading={loading}
-            isFavorited={isFavorited(prompt.id)}
-            onUse={handleUse}
-            onFavorite={handleFavorite}
-          />
-        ))}
-      </div>
+      {/* 推荐和热门板块 - 左右布局 */}
+      {!searchKeyword && (recommendedPrompts.length > 0 || hotPrompts.length > 0) && (
+        <div className="compact-sections">
+          {/* 推荐板块 */}
+          {recommendedPrompts.length > 0 && (
+            <div className="compact-section">
+              <div className="section-header">
+                <h2 className="section-title">推荐</h2>
+              </div>
+              <div className="prompt-list">
+                {recommendedPrompts.slice(0, 6).map(prompt => {
+                  const popoverId = `recommended-${prompt.id}`;
+                  return (
+                    <Popover
+                      key={prompt.id}
+                      content={
+                        <div className="prompt-card-popover">
+                          <PromptCard
+                            prompt={prompt}
+                            loading={false}
+                            isFavorited={isFavorited(prompt.id)}
+                            onUse={(p) => {
+                              handleUse(p);
+                              setPopoverVisible({ ...popoverVisible, [popoverId]: false });
+                            }}
+                            onFavorite={handleFavorite}
+                            disableHover={true}
+                          />
+                        </div>
+                      }
+                      trigger="click"
+                      open={popoverVisible[popoverId]}
+                      onOpenChange={(visible) => setPopoverVisible({ ...popoverVisible, [popoverId]: visible })}
+                      placement="rightTop"
+                      overlayClassName="prompt-popover"
+                      arrow={false}
+                    >
+                      <div className="prompt-list-item">
+                        <div className="prompt-list-content">
+                          <span className="prompt-list-title">{prompt.title}</span>
+                          <span className="prompt-list-description">{prompt.description}</span>
+                        </div>
+                        <div className="prompt-list-stats">
+                          <span className="stat-item">
+                            <EyeOutlined /> {prompt.viewCount}
+                          </span>
+                          <span className="stat-item">
+                            <HeartOutlined /> {prompt.favoriteCount}
+                          </span>
+                        </div>
+                      </div>
+                    </Popover>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
-      {prompts.length === 0 && !loading && (
-        <div className="empty-state">
-          <p>暂无提示词</p>
+          {/* 热门板块 */}
+          {hotPrompts.length > 0 && (
+            <div className="compact-section">
+              <div className="section-header">
+                <h2 className="section-title">热门</h2>
+              </div>
+              <div className="prompt-list">
+                {hotPrompts.slice(0, 6).map(prompt => {
+                  const popoverId = `hot-${prompt.id}`;
+                  return (
+                    <Popover
+                      key={prompt.id}
+                      content={
+                        <div className="prompt-card-popover">
+                          <PromptCard
+                            prompt={prompt}
+                            loading={false}
+                            isFavorited={isFavorited(prompt.id)}
+                            onUse={(p) => {
+                              handleUse(p);
+                              setPopoverVisible({ ...popoverVisible, [popoverId]: false });
+                            }}
+                            onFavorite={handleFavorite}
+                            disableHover={true}
+                          />
+                        </div>
+                      }
+                      trigger="click"
+                      open={popoverVisible[popoverId]}
+                      onOpenChange={(visible) => setPopoverVisible({ ...popoverVisible, [popoverId]: visible })}
+                      placement="rightTop"
+                      overlayClassName="prompt-popover"
+                      arrow={false}
+                    >
+                      <div className="prompt-list-item">
+                        <div className="prompt-list-content">
+                          <span className="prompt-list-title">{prompt.title}</span>
+                          <span className="prompt-list-description">{prompt.description}</span>
+                        </div>
+                        <div className="prompt-list-stats">
+                          <span className="stat-item">
+                            <EyeOutlined /> {prompt.viewCount}
+                          </span>
+                          <span className="stat-item">
+                            <HeartOutlined /> {prompt.favoriteCount}
+                          </span>
+                        </div>
+                      </div>
+                    </Popover>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
-      <div className="pagination-wrapper">
-        <Pagination
-          current={currentPage}
-          pageSize={pageSize}
-          total={total}
-          onChange={setCurrentPage}
-          showSizeChanger={false}
-        />
+      {/* 分类板块 */}
+      <div className="prompt-section">
+        <div className="section-header">
+          <h2 className="section-title">广场</h2>
+          <div className="category-tabs">
+            {CATEGORIES.map(category => (
+              <button
+                key={category.key}
+                className={`category-tab ${activeCategory === category.key ? 'active' : ''}`}
+                onClick={() => {
+                  setActiveCategory(category.key);
+                  setCurrentPage(1);
+                }}
+              >
+                {category.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="prompt-grid">
+          {prompts.map(prompt => (
+            <PromptCard
+              key={prompt.id}
+              prompt={prompt}
+              loading={loading}
+              isFavorited={isFavorited(prompt.id)}
+              onUse={handleUse}
+              onFavorite={handleFavorite}
+            />
+          ))}
+        </div>
+
+        {prompts.length === 0 && !loading && (
+          <div className="empty-state">
+            <p>暂无提示词</p>
+          </div>
+        )}
+
+        <div className="pagination-wrapper">
+          <Pagination
+            current={currentPage}
+            pageSize={pageSize}
+            total={total}
+            onChange={setCurrentPage}
+            showSizeChanger={false}
+          />
+        </div>
       </div>
 
       <ChatModal

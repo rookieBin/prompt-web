@@ -17,6 +17,7 @@ interface PromptCardProps {
   isFavorited: boolean;
   onUse: (prompt: Prompt) => void;
   onFavorite: (prompt: Prompt) => void;
+  disableHover?: boolean;
 }
 
 function PromptCardComponent({
@@ -25,6 +26,7 @@ function PromptCardComponent({
   isFavorited,
   onUse,
   onFavorite,
+  disableHover = false,
 }: PromptCardProps) {
   const [copied, setCopied] = useState(false);
 
@@ -41,7 +43,7 @@ function PromptCardComponent({
   };
 
   return (
-    <div className={`prompt-card ${loading ? 'loading' : ''}`}>
+    <div className={`prompt-card ${loading ? 'loading' : ''} ${disableHover ? 'no-hover' : ''}`}>
       {/* 渐变覆盖层 */}
       <div className="prompt-card-overlay" />
 

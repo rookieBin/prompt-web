@@ -16,13 +16,13 @@
   border-color: rgba(55, 65, 81, 0.8);
 }
 
-.prompt-card:hover {
+.prompt-card:hover:not(.no-hover) {
   border-color: rgba(191, 219, 254, 1);
   box-shadow: 0 20px 25px -5px rgba(59, 130, 246, 0.1), 0 8px 10px -6px rgba(59, 130, 246, 0.1);
   transform: translateY(-4px);
 }
 
-[data-theme='dark'] .prompt-card:hover {
+[data-theme='dark'] .prompt-card:hover:not(.no-hover) {
   border-color: rgba(30, 64, 175, 1);
   box-shadow: 0 20px 25px -5px rgba(59, 130, 246, 0.05), 0 8px 10px -6px rgba(59, 130, 246, 0.05);
 }
@@ -42,11 +42,11 @@
   z-index: 0;
 }
 
-.prompt-card:hover .prompt-card-overlay {
+.prompt-card:hover:not(.no-hover) .prompt-card-overlay {
   background: linear-gradient(to bottom right, rgba(239, 246, 255, 0.4), rgba(243, 232, 255, 0.4));
 }
 
-[data-theme='dark'] .prompt-card:hover .prompt-card-overlay {
+[data-theme='dark'] .prompt-card:hover:not(.no-hover) .prompt-card-overlay {
   background: linear-gradient(to bottom right, rgba(23, 37, 84, 0.3), rgba(59, 7, 100, 0.3));
 }
 
@@ -129,11 +129,11 @@
   color: rgb(243, 244, 246);
 }
 
-.prompt-card:hover .prompt-card-title {
+.prompt-card:hover:not(.no-hover) .prompt-card-title {
   color: rgb(30, 58, 138);
 }
 
-[data-theme='dark'] .prompt-card:hover .prompt-card-title {
+[data-theme='dark'] .prompt-card:hover:not(.no-hover) .prompt-card-title {
   color: rgb(219, 234, 254);
 }
 
@@ -174,11 +174,11 @@
   color: rgb(209, 213, 219);
 }
 
-.prompt-card:hover .prompt-card-description {
+.prompt-card:hover:not(.no-hover) .prompt-card-description {
   color: rgb(31, 41, 55);
 }
 
-[data-theme='dark'] .prompt-card:hover .prompt-card-description {
+[data-theme='dark'] .prompt-card:hover:not(.no-hover) .prompt-card-description {
   color: rgb(229, 231, 235);
 }
 
@@ -294,7 +294,7 @@
   transition: all 0.3s ease;
 }
 
-.prompt-card:hover .prompt-card-accent {
+.prompt-card:hover:not(.no-hover) .prompt-card-accent {
   background: linear-gradient(
     to right,
     rgba(59, 130, 246, 0.7),

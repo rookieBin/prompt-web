@@ -1,7 +1,7 @@
 # WePrompt 后端接口文档
 
-> 版本：v1.0.0
-> 更新时间：2026-01-08
+> 版本：v1.1.0
+> 更新时间：2026-01-23
 > 基础路径：`/api`
 
 ---
@@ -123,9 +123,9 @@ Authorization: Bearer {token}  // 需要登录的接口
 | page | int | 是 | 页码，从1开始 |
 | pageSize | int | 是 | 每页数量 |
 | keyword | string | 否 | 搜索关键词（匹配标题、描述、标签） |
-| tag | string | 否 | 按标签筛选 |
+| category | string | 否 | 按分类筛选（programming/writing/business/design/data/other） |
 
-**请求示例：** `GET /api/prompts?page=1&pageSize=12&keyword=代码`
+**请求示例：** `GET /api/prompts?page=1&pageSize=12&category=programming&keyword=代码`
 
 **响应示例：**
 ```json
@@ -172,7 +172,79 @@ Authorization: Bearer {token}  // 需要登录的接口
 
 ---
 
-### 3.2 获取提示词详情
+### 3.2 获取推荐提示词
+
+**接口地址：** `GET /api/prompts/recommended`
+
+**请求参数：** 无
+
+**响应示例：**
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": [
+    {
+      "id": "1",
+      "title": "代码审查助手",
+      "author": "开发者A",
+      "authorId": "user1",
+      "description": "帮助审查代码，找出潜在问题和改进建议",
+      "content": "你是一个专业的代码审查助手...",
+      "tags": ["编程", "代码审查", "开发"],
+      "viewCount": 1250,
+      "favoriteCount": 89,
+      "createdAt": "2024-01-15T10:00:00Z",
+      "updatedAt": "2024-01-15T10:00:00Z"
+    }
+  ]
+}
+```
+
+**说明：**
+- 返回推荐的提示词列表（建议6-8个）
+- 推荐算法可基于：收藏数、查看数、用户偏好等
+- 前端会展示前4个在推荐板块
+
+---
+
+### 3.3 获取热门提示词
+
+**接口地址：** `GET /api/prompts/hot`
+
+**请求参数：** 无
+
+**响应示例：**
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": [
+    {
+      "id": "2",
+      "title": "产品文案撰写",
+      "author": "文案师B",
+      "authorId": "user2",
+      "description": "生成吸引人的产品描述和营销文案",
+      "content": "你是一个专业的产品文案撰写专家...",
+      "tags": ["文案", "营销", "产品"],
+      "viewCount": 980,
+      "favoriteCount": 67,
+      "createdAt": "2024-01-14T15:30:00Z",
+      "updatedAt": "2024-01-14T15:30:00Z"
+    }
+  ]
+}
+```
+
+**说明：**
+- 返回热门的提示词列表（建议6-8个）
+- 热门算法可基于：近期查看数、收藏增长率等
+- 前端会展示前4个在热门板块
+
+---
+
+### 3.4 获取提示词详情
 
 **接口地址：** `GET /api/prompts/{id}`
 
@@ -206,7 +278,28 @@ Authorization: Bearer {token}  // 需要登录的接口
 
 ---
 
-### 3.3 创建提示词
+### 3.4.1 分类系统说明
+
+提示词广场支持以下分类：
+
+| 分类值 | 显示名称 | 匹配关键词 |
+|--------|----------|-----------|
+| programming | 编程开发 | 编程、代码、开发、API、测试、重构、优化、QA、质量、数据库、性能、安全、审计 |
+| writing | 文案写作 | 文案、写作、创意、文学、内容 |
+| business | 商务办公 | 商务、邮件、沟通、产品、用户故事、需求、项目管理、计划、规划、报告、商业 |
+| design | 设计创意 | 设计、UI、UX |
+| data | 数据分析 | 数据分析、数据 |
+| other | 其他 | 不属于以上分类的提示词 |
+
+**分类判断逻辑：**
+- 后端应根据提示词的 `tags` 字段判断其所属分类
+- 如果标签中包含某个分类的关键词，则归入该分类
+- 一个提示词只归入一个分类（优先级按上表顺序）
+- 如果不匹配任何分类，则归入"其他"
+
+---
+
+### 3.5 创建提示词
 
 **接口地址：** `POST /api/prompts`
 
@@ -252,7 +345,7 @@ Authorization: Bearer {token}  // 需要登录的接口
 
 ---
 
-### 3.4 收藏/取消收藏提示词
+### 3.6 收藏/取消收藏提示词
 
 **接口地址：** `POST /api/prompts/{id}/favorite`
 
@@ -282,7 +375,7 @@ Authorization: Bearer {token}  // 需要登录的接口
 
 ---
 
-### 3.5 获取用户收藏列表
+### 3.7 获取用户收藏列表
 
 **接口地址：** `GET /api/user/favorites`
 
@@ -310,7 +403,7 @@ Authorization: Bearer {token}  // 需要登录的接口
 
 ---
 
-### 3.6 检查是否已收藏
+### 3.8 检查是否已收藏
 
 **接口地址：** `GET /api/prompts/{id}/favorited`
 
@@ -884,7 +977,9 @@ CREATE TABLE t_workshop_category (
 |------|------|----------|------|
 | 用户 | GET | /api/user/current | 获取当前用户信息 |
 | 用户 | PUT | /api/user/current | 更新用户信息 |
-| 提示词 | GET | /api/prompts | 获取提示词列表（分页） |
+| 提示词 | GET | /api/prompts | 获取提示词列表（分页，支持分类和关键词筛选） |
+| 提示词 | GET | /api/prompts/recommended | 获取推荐提示词 |
+| 提示词 | GET | /api/prompts/hot | 获取热门提示词 |
 | 提示词 | GET | /api/prompts/{id} | 获取提示词详情 |
 | 提示词 | POST | /api/prompts | 创建提示词 |
 | 提示词 | POST | /api/prompts/{id}/favorite | 收藏/取消收藏 |

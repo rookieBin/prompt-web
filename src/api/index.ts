@@ -78,11 +78,29 @@ void new ApiClient(API_BASE_URL);
 export const promptApi = {
   // 获取提示词列表（分页）
   getPrompts: async (params: PaginationParams): Promise<ApiResponse<PaginationResponse<Prompt>>> => {
-    // 模拟数据
     const stored = localStorage.getItem('prompts');
-    const allPrompts: Prompt[] = stored ? JSON.parse(stored) : getMockPrompts();
+    let allPrompts: Prompt[] = stored ? JSON.parse(stored) : getMockPrompts();
     
-    const { page, pageSize } = params;
+    const { page, pageSize, category, keyword } = params;
+    
+    // 按分类筛选
+    if (category && category !== 'all') {
+      allPrompts = allPrompts.filter(p => {
+        const promptCategory = getCategoryByTags(p.tags);
+        return promptCategory === category;
+      });
+    }
+    
+    // 按关键词搜索
+    if (keyword) {
+      const lowerKeyword = keyword.toLowerCase();
+      allPrompts = allPrompts.filter(p =>
+        p.title.toLowerCase().includes(lowerKeyword) ||
+        p.description.toLowerCase().includes(lowerKeyword) ||
+        p.tags.some(tag => tag.toLowerCase().includes(lowerKeyword))
+      );
+    }
+    
     const start = (page - 1) * pageSize;
     const end = start + pageSize;
     const list = allPrompts.slice(start, end);
@@ -96,6 +114,40 @@ export const promptApi = {
         page,
         pageSize,
       },
+    };
+  },
+
+  // 获取推荐提示词
+  getRecommendedPrompts: async (): Promise<ApiResponse<Prompt[]>> => {
+    const stored = localStorage.getItem('prompts');
+    const allPrompts: Prompt[] = stored ? JSON.parse(stored) : getMockPrompts();
+    
+    // 模拟推荐算法：返回收藏数最多的前6个
+    const recommended = [...allPrompts]
+      .sort((a, b) => b.favoriteCount - a.favoriteCount)
+      .slice(0, 6);
+    
+    return {
+      code: 200,
+      message: 'success',
+      data: recommended,
+    };
+  },
+
+  // 获取热门提示词
+  getHotPrompts: async (): Promise<ApiResponse<Prompt[]>> => {
+    const stored = localStorage.getItem('prompts');
+    const allPrompts: Prompt[] = stored ? JSON.parse(stored) : getMockPrompts();
+    
+    // 模拟热门算法：返回查看数最多的前6个
+    const hot = [...allPrompts]
+      .sort((a, b) => b.viewCount - a.viewCount)
+      .slice(0, 6);
+    
+    return {
+      code: 200,
+      message: 'success',
+      data: hot,
     };
   },
 
@@ -385,6 +437,25 @@ export const chatApi = {
   },
 };
 
+// 根据标签判断分类的辅助函数
+function getCategoryByTags(tags: string[]): string {
+  const categoryMap: Record<string, string[]> = {
+    programming: ['编程', '代码', '开发', 'API', '测试', '重构', '优化', 'QA', '质量', '数据库', '设计', '性能', '安全', '审计'],
+    writing: ['文案', '写作', '创意', '文学', '内容'],
+    business: ['商务', '邮件', '沟通', '产品', '用户故事', '需求', '项目管理', '计划', '规划', '报告', '商业'],
+    design: ['设计', 'UI', 'UX'],
+    data: ['数据分析', '数据'],
+  };
+  
+  for (const [category, keywords] of Object.entries(categoryMap)) {
+    if (tags.some(tag => keywords.some(keyword => tag.includes(keyword)))) {
+      return category;
+    }
+  }
+  
+  return 'other';
+}
+
 // 模拟数据生成函数
 function getMockPrompts(): Prompt[] {
   const mockPrompts: Prompt[] = [
@@ -598,12 +669,12 @@ function getMockPrompts(): Prompt[] {
     },
   ];
 
-  // 初始化localStorage - 如果数据数量少于16个，则更新
+  // 初始化localStorage
   const stored = localStorage.getItem('prompts');
-  if (!stored || (stored && JSON.parse(stored).length < 16)) {
+  if (!stored) {
     localStorage.setItem('prompts', JSON.stringify(mockPrompts));
   }
 
-  return mockPrompts;
+  return stored ? JSON.parse(stored) : mockPrompts;
 }
 

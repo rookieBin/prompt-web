@@ -36,15 +36,22 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     if (themeMode === 'system') {
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
       const handler = (e: MediaQueryListEvent) => {
-        setActualTheme(e.matches ? 'dark' : 'light');
+        const newTheme = e.matches ? 'dark' : 'light';
+        setActualTheme(newTheme);
+        // 设置 body 的主题属性，让 Popover 能继承暗黑模式
+        document.body.setAttribute('data-theme', newTheme);
       };
       
-      setActualTheme(mediaQuery.matches ? 'dark' : 'light');
+      const initialTheme = mediaQuery.matches ? 'dark' : 'light';
+      setActualTheme(initialTheme);
+      document.body.setAttribute('data-theme', initialTheme);
       mediaQuery.addEventListener('change', handler);
       
       return () => mediaQuery.removeEventListener('change', handler);
     } else {
       setActualTheme(themeMode);
+      // 设置 body 的主题属性，让 Popover 能继承暗黑模式
+      document.body.setAttribute('data-theme', themeMode);
     }
   }, [themeMode]);
 

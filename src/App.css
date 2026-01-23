@@ -18,3 +18,105 @@ body {
 #root {
   min-height: 100vh;
 }
+
+/* Ant Design Popover 暗黑模式全局样式 */
+[data-theme='dark'] .ant-popover {
+  color-scheme: dark;
+}
+
+/* 移除 Popover 容器的内边距，让 PromptCard 完全填充 */
+.ant-popover .ant-popover-container {
+  padding: 0 !important;
+  border-radius: 12px !important;
+}
+
+[data-theme='dark'] .ant-popover-inner {
+  background: #12121a !important;
+  border: 1px solid rgba(168, 85, 247, 0.15) !important;
+  box-shadow: 0 6px 16px 0 rgba(0, 0, 0, 0.32), 0 3px 6px -4px rgba(0, 0, 0, 0.48), 0 9px 28px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+[data-theme='dark'] .ant-popover-arrow::before {
+  background: #12121a !important;
+  border: 1px solid rgba(168, 85, 247, 0.15) !important;
+}
+
+[data-theme='dark'] .ant-popover-arrow::after {
+  background: #12121a !important;
+}
+
+[data-theme='dark'] .ant-popover-inner-content {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Popover 内的 PromptCard 暗黑模式样式 */
+[data-theme='dark'] .ant-popover .prompt-card {
+  background: rgba(31, 41, 55, 0.9) !important;
+  border-color: rgba(55, 65, 81, 0.8) !important;
+}
+
+[data-theme='dark'] .ant-popover .prompt-card-title {
+  color: rgb(243, 244, 246) !important;
+}
+
+[data-theme='dark'] .ant-popover .prompt-card-author {
+  color: rgb(156, 163, 175) !important;
+}
+
+[data-theme='dark'] .ant-popover .prompt-card-description {
+  color: rgb(209, 213, 219) !important;
+}
+
+[data-theme='dark'] .ant-popover .prompt-card-actions {
+  border-top-color: rgba(55, 65, 81, 0.8) !important;
+}
+
+[data-theme='dark'] .ant-popover .action-btn {
+  color: rgb(107, 114, 128) !important;
+}
+
+[data-theme='dark'] .ant-popover .action-btn:first-child {
+  border-right-color: rgba(55, 65, 81, 0.8) !important;
+}
+
+[data-theme='dark'] .ant-popover .action-btn:hover {
+  background: rgba(30, 58, 138, 0.2) !important;
+  color: rgb(96, 165, 250) !important;
+}
+
+[data-theme='dark'] .ant-popover .action-btn.favorited {
+  color: #ff4d4f !important;
+}
+
+[data-theme='dark'] .ant-popover .action-btn.favorited:hover {
+  color: #ff7875 !important;
+  background: rgba(255, 77, 79, 0.05) !important;
+}
+
+[data-theme='dark'] .ant-popover .copy-btn {
+  color: rgb(107, 114, 128) !important;
+}
+
+[data-theme='dark'] .ant-popover .copy-btn:hover {
+  background: rgba(59, 130, 246, 0.2) !important;
+  color: rgb(96, 165, 250) !important;
+}
+
+[data-theme='dark'] .ant-popover .copy-btn.copied {
+  color: rgb(34, 197, 94) !important;
+}
+
+[data-theme='dark'] .ant-popover .copy-btn.copied:hover {
+  background: rgba(34, 197, 94, 0.1) !important;
+  color: rgb(34, 197, 94) !important;
+}
+
+[data-theme='dark'] .ant-popover .prompt-tag {
+  background: linear-gradient(to right, rgba(30, 58, 138, 0.2), rgba(88, 28, 135, 0.2)) !important;
+  border-color: rgba(30, 64, 175, 0.5) !important;
+  color: rgb(147, 197, 253) !important;
+}
+
+[data-theme='dark'] .ant-popover .stat-item {
+  color: rgb(156, 163, 175) !important;
+}

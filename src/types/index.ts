@@ -57,6 +57,8 @@ export interface ApiResponse<T = any> {
 export interface PaginationParams {
   page: number;
   pageSize: number;
+  category?: string;
+  keyword?: string;
 }
 
 export interface PaginationResponse<T> {

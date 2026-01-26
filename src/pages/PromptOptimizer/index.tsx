@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Input, Button } from 'antd';
 import { CopyOutlined, ReloadOutlined } from '@ant-design/icons';
 import { Sparkles } from 'lucide-react';
@@ -9,8 +10,20 @@ import { useAgentWorkflow } from './hooks/useAgentWorkflow';
 import './index.css';
 
 export default function PromptOptimizer() {
+  const location = useLocation();
   const [userInput, setUserInput] = useState('');
   const { agents, logs, finalOutput, score, isRunning, startWorkflow, reset } = useAgentWorkflow();
+
+  const initialPrompt = useMemo(() => {
+    const state = location.state as { initialPrompt?: string } | null;
+    return state?.initialPrompt ?? '';
+  }, [location.state]);
+
+  useEffect(() => {
+    if (initialPrompt.trim()) {
+      setUserInput(initialPrompt);
+    }
+  }, [initialPrompt]);
 
   useEffect(() => {
     if (finalOutput) {

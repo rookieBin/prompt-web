@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button, Input, Empty, Spin } from 'antd';
-import { EditOutlined, CopyOutlined } from '@ant-design/icons';
+import { EditOutlined, CopyOutlined, ArrowRightOutlined, BulbOutlined } from '@ant-design/icons';
 import { useTheme } from '@/contexts/ThemeContext';
 import type { WorkshopTemplate, Bank, Category } from '@/types';
 import { DEFAULT_CATEGORIES } from './constants/categories';
@@ -21,6 +22,7 @@ const STORAGE_KEYS = {
 export default function PromptWorkshop() {
   const { theme } = useTheme();
   const isDarkMode = theme === 'dark';
+  const navigate = useNavigate();
 
   // 状态管理
   const [loading, setLoading] = useState(true);
@@ -231,6 +233,12 @@ export default function PromptWorkshop() {
     }
   };
 
+  const handleSendToOptimizer = () => {
+    const prompt = generateFinalPrompt();
+    if (!prompt.trim()) return;
+    navigate('/optimizer', { state: { initialPrompt: prompt } });
+  };
+
   if (loading) {
     return (
       <div className="workshop-loading">
@@ -274,6 +282,7 @@ export default function PromptWorkshop() {
                   <>
                     <Button icon={<EditOutlined />} onClick={handleStartEdit}>编辑</Button>
                     <Button icon={<CopyOutlined />} onClick={handleCopyPrompt}>复制提示词</Button>
+                    <Button icon={<BulbOutlined />} onClick={handleSendToOptimizer}>提示词优化</Button>
                   </>
                 )}
               </div>

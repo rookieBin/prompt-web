@@ -5,16 +5,18 @@ import NodeConfigPanel from './components/NodeConfigPanel';
 import RawConsole from './components/RawConsole';
 import WorkflowCanvas, { type WorkflowCanvasHandle } from './components/WorkflowCanvas';
 import WorkflowToolbar from './components/WorkflowToolbar';
+import InteractivePanel from './components/InteractivePanel';
 import { useGraphWorkflow } from './hooks/useGraphWorkflow';
-import type { WorkflowNodeData } from './types';
+import type { WorkflowNodeData, InteractiveRequest } from './types';
 import './index.css';
 
 export default function PromptOptimizer() {
   const location = useLocation();
   const [userInput, setUserInput] = useState('');
   const [selectedNode, setSelectedNode] = useState<{ id: string; data: WorkflowNodeData } | null>(null);
+  const [interactiveRequest, setInteractiveRequest] = useState<InteractiveRequest | null>(null);
   const canvasRef = useRef<WorkflowCanvasHandle>(null);
-  const { logs, finalOutput, isRunning, activeNodeId, failedNodeId, run, reset } = useGraphWorkflow();
+  const { logs, finalOutput, isRunning, activeNodeId, failedNodeId, interactiveState, run, reset, continueInteractive, cancelInteractive } = useGraphWorkflow();
 
   const initialPrompt = useMemo(() => {
     const state = location.state as { initialPrompt?: string } | null;
@@ -28,10 +30,18 @@ export default function PromptOptimizer() {
   }, [initialPrompt]);
 
   useEffect(() => {
-    if (finalOutput) {
+    if (finalOutput && !interactiveState) {
       setUserInput(finalOutput);
     }
-  }, [finalOutput]);
+  }, [finalOutput, interactiveState]);
+
+  useEffect(() => {
+    if (interactiveState?.request) {
+      setInteractiveRequest(interactiveState.request);
+    } else {
+      setInteractiveRequest(null);
+    }
+  }, [interactiveState]);
 
   const handleStart = () => {
     if (!userInput.trim()) return;
@@ -48,20 +58,47 @@ export default function PromptOptimizer() {
     await navigator.clipboard.writeText(userInput);
   };
 
+  const handleInteractiveSubmit = (data: Record<string, any>) => {
+    continueInteractive(data);
+    setInteractiveRequest(null);
+  };
+
+  const handleInteractiveCancel = () => {
+    // 用户主动中断，标记失败节点
+    if (interactiveState?.nodeId) {
+      cancelInteractive(interactiveState.nodeId);
+    }
+    setInteractiveRequest(null);
+  };
+
   return (
     <div className="prompt-optimizer-container">
       <Splitter className="optimizer-splitter" orientation="horizontal">
         <Splitter.Panel defaultSize={'35%'} min={260} max="55%">
-          <div className="input-section">
-            <Input.TextArea
-              value={userInput}
-              onChange={(e) => setUserInput(e.target.value)}
-              placeholder="输入你的原始提示词..."
-              disabled={isRunning}
-              autoSize={false}
-              className="input-textarea"
-            />
-          </div>
+          <Splitter className="input-interaction-splitter" orientation="vertical">
+            <Splitter.Panel defaultSize="60%" min={120} max="60%">
+              <div className="input-section">
+                <Input.TextArea
+                  value={userInput}
+                  onChange={(e) => setUserInput(e.target.value)}
+                  placeholder="输入你的原始提示词..."
+                  disabled={isRunning}
+                  autoSize={false}
+                  className="input-textarea"
+                />
+              </div>
+            </Splitter.Panel>
+            <Splitter.Panel size={interactiveRequest ? '40%' : 0} min={120} max="60%" resizable={Boolean(interactiveRequest)}>
+              {interactiveRequest && (
+                <InteractivePanel
+                  request={interactiveRequest}
+                  onSubmit={handleInteractiveSubmit}
+                  onCancel={handleInteractiveCancel}
+                  loading={isRunning}
+                />
+              )}
+            </Splitter.Panel>
+          </Splitter>
         </Splitter.Panel>
 
         <Splitter.Panel>

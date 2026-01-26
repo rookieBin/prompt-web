@@ -128,6 +128,8 @@ function getDefaultLabel(type: WorkflowNodeType): string {
       return '风格调整（更正式）';
     case 'style_casual':
       return '风格调整（更口语）';
+    case 'interactive':
+      return '多轮表单优化';
     default: {
       const _exhaustive: never = type;
       return _exhaustive;
@@ -155,6 +157,8 @@ function getNodeStyle(type: WorkflowNodeType) {
       return { fill: '#EFF6FF', stroke: '#3B82F6' };
     case 'style_casual':
       return { fill: '#FDF2F8', stroke: '#EC4899' };
+    case 'interactive':
+      return { fill: '#F0F9FF', stroke: '#0EA5E9' };
     default: {
       const _exhaustive: never = type;
       return _exhaustive;
@@ -290,6 +294,8 @@ const WorkflowCanvas = forwardRef<WorkflowCanvasHandle, WorkflowCanvasProps>(fun
       const isActive = activeId === node.id;
       const isFailed = failedId === node.id;
       const isSelected = selectedId === node.id;
+      
+      // 设置节点样式
       node.setAttrs({
         body: {
           fill: isFailed ? '#FEF2F2' : style.fill,
@@ -301,8 +307,49 @@ const WorkflowCanvas = forwardRef<WorkflowCanvasHandle, WorkflowCanvasProps>(fun
         },
       });
 
+      // 添加波浪动画效果
       if (isActive) {
+        node.setAttrs({
+          body: {
+            fill: isFailed ? '#FEF2F2' : style.fill,
+            stroke: '#22C55E',
+            strokeWidth: 3,
+            strokeDasharray: '5,5',
+            strokeDashoffset: 0,
+          },
+        });
+        
+        // 创建动画
+        if (!(node as any)._animated) {
+          (node as any)._animated = true;
+          let offset = 0;
+          const animate = () => {
+            offset = (offset + 0.1) % 10; // 减慢动画速度
+            node.setAttrs({
+              body: {
+                strokeDashoffset: offset,
+              },
+            });
+            if ((node as any)._animated) {
+              requestAnimationFrame(animate);
+            }
+          };
+          animate();
+        }
+        
         node.toFront();
+      } else {
+        // 移除动画
+        (node as any)._animated = false;
+        node.setAttrs({
+          body: {
+            fill: isFailed ? '#FEF2F2' : style.fill,
+            stroke: isFailed ? '#EF4444' : isSelected ? '#3B82F6' : style.stroke,
+            strokeWidth: isFailed || isSelected ? 3 : 2,
+            strokeDasharray: null,
+            strokeDashoffset: null,
+          },
+        });
       }
     });
 
@@ -330,11 +377,14 @@ const WorkflowCanvas = forwardRef<WorkflowCanvasHandle, WorkflowCanvasProps>(fun
       const isActiveEdge = activeOutgoing.has(edge.id);
       const isFailedEdge = failedOutgoing.has(edge.id);
       const isSelectedEdge = selectedId === edge.id;
+      
+      // 设置边的样式和动画
       edge.setAttrs({
         line: {
           class: isActiveEdge ? 'x6-edge-line--active' : '',
           stroke: isActiveEdge ? '#22C55E' : isFailedEdge ? '#EF4444' : isSelectedEdge ? '#3B82F6' : '#6B7280',
           strokeWidth: 2,
+          strokeDasharray: isActiveEdge ? '6,6' : null,
           targetMarker: {
             name: 'block',
             width: 12,
@@ -342,6 +392,34 @@ const WorkflowCanvas = forwardRef<WorkflowCanvasHandle, WorkflowCanvasProps>(fun
           },
         },
       });
+      
+      // 为活跃边添加动画
+      if (isActiveEdge) {
+        if (!(edge as any)._animated) {
+          (edge as any)._animated = true;
+          let offset = 0;
+          const animateEdge = () => {
+            offset = (offset + 0.1) % 12;
+            edge.setAttrs({
+              line: {
+                strokeDashoffset: offset,
+              },
+            });
+            if ((edge as any)._animated) {
+              requestAnimationFrame(animateEdge);
+            }
+          };
+          animateEdge();
+        }
+      } else {
+        // 移除边动画
+        (edge as any)._animated = false;
+        edge.setAttrs({
+          line: {
+            strokeDashoffset: null,
+          },
+        });
+      }
     });
   };
 

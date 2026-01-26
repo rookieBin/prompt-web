@@ -80,6 +80,19 @@
   background-clip: text;
 }
 
+.input-interaction-splitter {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.input-interaction-splitter :global(.ant-splitter-panel),
+.input-interaction-splitter :global(.ant-splitter-panel > div) {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
 .input-textarea {
   flex: 1;
   min-height: 0;
@@ -259,7 +272,7 @@
   min-height: 0;
   display: flex;
   margin-top: 6px;
-  height: 100%;
+  height: calc(100% - 6px);
   overflow: hidden;
 }
 

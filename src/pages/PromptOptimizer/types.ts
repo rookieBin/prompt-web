@@ -11,7 +11,8 @@ export type WorkflowNodeType =
   | 'prompt_shorten'
   | 'prompt_expand'
   | 'style_formal'
-  | 'style_casual';
+  | 'style_casual'
+  | 'interactive';
 
 export interface WorkflowNodeData {
   type: WorkflowNodeType;
@@ -94,4 +95,58 @@ export interface WorkflowState {
   score?: JudgeScore;
   iterations: number;
   maxIterations: number;
+}
+
+// 多轮表单优化节点表单字段
+export interface InteractiveFormField {
+  id: string;
+  name: string;
+  label: string;
+  type: 'text' | 'textarea' | 'select' | 'number' | 'single' | 'multiple';
+  required?: boolean;
+  placeholder?: string;
+  options?: Array<{ label: string; value: string }>;
+  validation?: {
+    min?: number;
+    max?: number;
+    pattern?: string;
+    message?: string;
+  };
+}
+
+// 多轮表单优化节点请求（兼容旧版表单格式）
+export interface InteractiveRequest {
+  message: string;
+  fields: InteractiveFormField[];
+  // 兼容旧版格式
+  title?: string;
+  description?: string;
+  form?: {
+    title: string;
+    description: string;
+    fields: Array<{
+      type: 'single' | 'multiple' | 'text';
+      label: string;
+      name: string;
+      options?: string[];
+      required?: boolean;
+    }>;
+  };
+}
+
+// 多轮表单优化节点响应（兼容旧版格式）
+export interface InteractiveResponse {
+  data: Record<string, any>;
+  // 兼容旧版格式
+  form_answer?: Record<string, any>;
+}
+
+// 多轮表单优化节点状态
+export interface InteractiveState {
+  nodeId: string;
+  stage: 'waiting' | 'collecting' | 'processing' | 'completed';
+  request?: InteractiveRequest;
+  response?: InteractiveResponse;
+  originalPrompt: string;
+  roundCount?: number;
 }

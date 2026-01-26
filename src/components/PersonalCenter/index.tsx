@@ -170,12 +170,6 @@ export default function PersonalCenter({ visible, onClose, user, onUserUpdate }:
                     style={{ width: '100%' }}
                   />
                 </Form.Item>
-                <Form.Item
-                  name="difyApiKey"
-                  label="Dify API Key"
-                >
-                  <Input.Password placeholder="请输入Dify API Key" />
-                </Form.Item>
                 <Form.Item>
                   <Button type="primary" htmlType="submit">
                     保存配置

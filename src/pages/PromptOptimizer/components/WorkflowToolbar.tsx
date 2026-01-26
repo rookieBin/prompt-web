@@ -104,6 +104,17 @@ const items: MenuProps['items'] = [
       </div>
     ),
   },
+  {
+    key: 'interactive',
+    label: (
+      <div>
+        <div>多轮表单优化</div>
+        <div style={{ fontSize: 12, color: '#999', marginTop: 2 }}>
+          与用户多轮交互，收集信息并生成表单
+        </div>
+      </div>
+    ),
+  },
 ];
 
 export default function WorkflowToolbar({

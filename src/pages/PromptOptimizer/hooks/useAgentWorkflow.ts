@@ -21,7 +21,7 @@ export function useAgentWorkflow() {
     maxIterations: 3,
   });
 
-  const addLog = useCallback((agent: AgentType, message: string, type: ConsoleLog['type'] = 'info') => {
+  const addLog = useCallback((agent: string, message: string, type: ConsoleLog['type'] = 'info') => {
     const log: ConsoleLog = {
       id: `${Date.now()}-${Math.random()}`,
       agent,

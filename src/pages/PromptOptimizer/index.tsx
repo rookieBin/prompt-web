@@ -1,18 +1,20 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Input, Button } from 'antd';
-import { CopyOutlined, ReloadOutlined } from '@ant-design/icons';
-import { Sparkles } from 'lucide-react';
-import AgentCanvas from './components/AgentCanvas';
-import LiveConsole from './components/LiveConsole';
-import ScoreRadar from './components/ScoreRadar';
-import { useAgentWorkflow } from './hooks/useAgentWorkflow';
+import { Input, Splitter } from 'antd';
+import NodeConfigPanel from './components/NodeConfigPanel';
+import RawConsole from './components/RawConsole';
+import WorkflowCanvas, { type WorkflowCanvasHandle } from './components/WorkflowCanvas';
+import WorkflowToolbar from './components/WorkflowToolbar';
+import { useGraphWorkflow } from './hooks/useGraphWorkflow';
+import type { WorkflowNodeData } from './types';
 import './index.css';
 
 export default function PromptOptimizer() {
   const location = useLocation();
   const [userInput, setUserInput] = useState('');
-  const { agents, logs, finalOutput, score, isRunning, startWorkflow, reset } = useAgentWorkflow();
+  const [selectedNode, setSelectedNode] = useState<{ id: string; data: WorkflowNodeData } | null>(null);
+  const canvasRef = useRef<WorkflowCanvasHandle>(null);
+  const { logs, finalOutput, isRunning, activeNodeId, failedNodeId, run, reset } = useGraphWorkflow();
 
   const initialPrompt = useMemo(() => {
     const state = location.state as { initialPrompt?: string } | null;
@@ -33,7 +35,8 @@ export default function PromptOptimizer() {
 
   const handleStart = () => {
     if (!userInput.trim()) return;
-    startWorkflow(userInput);
+    const snapshot = canvasRef.current?.getSnapshot() ?? null;
+    run(userInput, snapshot);
   };
 
   const handleReset = () => {
@@ -47,78 +50,72 @@ export default function PromptOptimizer() {
 
   return (
     <div className="prompt-optimizer-container">
-      <div className="optimizer-toolbar">
-        <div className="optimizer-title">
-          <Sparkles className="header-icon" />
-          <h2 className="header-title">多智能体协作提示词进化工坊</h2>
-        </div>
-        <div className="input-actions">
-          <Button
-            type="primary"
-            size="large"
-            onClick={handleStart}
-            disabled={!userInput.trim() || isRunning}
-            loading={isRunning}
-            className="start-button"
-          >
-            {isRunning ? '工作流运行中...' : '启动优化'}
-          </Button>
-          <Button
-            size="large"
-            icon={<CopyOutlined />}
-            onClick={handleCopy}
-            disabled={!userInput.trim()}
-            className="reset-button"
-          >
-            复制
-          </Button>
-          {(finalOutput || isRunning) && (
-            <Button
-              size="large"
-              icon={<ReloadOutlined />}
-              onClick={handleReset}
-              className="reset-button"
-            >
-              重新开始
-            </Button>
-          )}
-        </div>
-      </div>
+      <Splitter className="optimizer-splitter" orientation="horizontal">
+        <Splitter.Panel defaultSize={'35%'} min={260} max="55%">
+          <div className="input-section">
+            <Input.TextArea
+              value={userInput}
+              onChange={(e) => setUserInput(e.target.value)}
+              placeholder="输入你的原始提示词..."
+              disabled={isRunning}
+              autoSize={false}
+              className="input-textarea"
+            />
+          </div>
+        </Splitter.Panel>
 
-      <div className="optimizer-body">
-        {/* 输入区域 */}
-        <div className="input-section">
-          <Input.TextArea
-            value={userInput}
-            onChange={(e) => setUserInput(e.target.value)}
-            placeholder="输入你的原始提示词，让 AI 智能体团队帮你优化..."
-            disabled={isRunning}
-            autoSize={false}
-            className="input-textarea"
-          />
-        </div>
+        <Splitter.Panel>
+          <Splitter className="workflow-splitter" orientation="vertical">
+            <Splitter.Panel defaultSize="70%" min={260}>
+              <div className="canvas-section">
+                <WorkflowToolbar
+                  onAddNode={(type) => canvasRef.current?.addNode(type)}
+                  onDeleteSelected={() => canvasRef.current?.deleteSelected()}
+                  onRun={handleStart}
+                  onCopy={handleCopy}
+                  onReset={handleReset}
+                  canRun={Boolean(userInput.trim())}
+                  isRunning={isRunning}
+                  canCopy={Boolean(userInput.trim())}
+                  showReset={Boolean(finalOutput || isRunning)}
+                />
 
-        {/* 日志和结果区域 */}
-        <div className="output-panel">
-          {/* Agent 协作画布 */}
-          {agents.length > 0 && (
-            <div className="canvas-section">
-              <AgentCanvas agents={agents} />
-            </div>
-          )}
-
-          {logs.length > 0 && (
-            <div className="output-section">
-              <div className="output-left">
-                <LiveConsole logs={logs} />
-                <div className="score-section">
-                  <ScoreRadar score={score} />
-                </div>
+                <Splitter className="canvas-config-splitter" orientation="horizontal">
+                  <Splitter.Panel>
+                    <div className="workflow-main-canvas">
+                      <WorkflowCanvas
+                        ref={canvasRef}
+                        activeNodeId={activeNodeId}
+                        failedNodeId={failedNodeId}
+                        onSelectNode={(n) => setSelectedNode(n)}
+                      />
+                    </div>
+                  </Splitter.Panel>
+                  <Splitter.Panel
+                    size={selectedNode ? 360 : 0}
+                    min={280}
+                    max="50%"
+                    resizable={Boolean(selectedNode)}
+                  >
+                    <div className={`workflow-main-config ${selectedNode ? '' : 'workflow-main-config--hidden'}`}>
+                      <NodeConfigPanel
+                        selected={selectedNode}
+                        onUpdate={(nodeId, patch) => canvasRef.current?.updateNodeData(nodeId, patch)}
+                      />
+                    </div>
+                  </Splitter.Panel>
+                </Splitter>
               </div>
-            </div>
-          )}
-        </div>
-      </div>
+            </Splitter.Panel>
+
+            <Splitter.Panel defaultSize="30%" min={160}>
+              <div className="output-section">
+                <RawConsole logs={logs} />
+              </div>
+            </Splitter.Panel>
+          </Splitter>
+        </Splitter.Panel>
+      </Splitter>
     </div>
   );
 }

@@ -4,6 +4,42 @@ export type AgentState = 'idle' | 'running' | 'completed' | 'failed';
 // Agent 类型
 export type AgentType = 'architect' | 'redteamer' | 'judge' | 'adapter';
 
+// 编排节点类型（扩展：支持新增节点）
+export type WorkflowNodeType =
+  | 'start'
+  | AgentType
+  | 'prompt_shorten'
+  | 'prompt_expand'
+  | 'style_formal'
+  | 'style_casual';
+
+export interface WorkflowNodeData {
+  type: WorkflowNodeType;
+  label: string;
+  config: {
+    model?: string;
+    temperature?: number;
+    maxTokens?: number;
+    [key: string]: unknown;
+  };
+}
+
+export interface WorkflowEdgeSnapshot {
+  id: string;
+  source: string;
+  target: string;
+}
+
+export interface WorkflowNodeSnapshot {
+  id: string;
+  data: WorkflowNodeData;
+}
+
+export interface WorkflowSnapshot {
+  nodes: WorkflowNodeSnapshot[];
+  edges: WorkflowEdgeSnapshot[];
+}
+
 // Agent 信息
 export interface Agent {
   id: AgentType;
@@ -41,7 +77,7 @@ export interface JudgeScore {
 // 协作日志
 export interface ConsoleLog {
   id: string;
-  agent: AgentType;
+  agent: string;
   message: string;
   timestamp: number;
   type: 'info' | 'warning' | 'success' | 'error';
@@ -54,6 +90,7 @@ export interface WorkflowState {
   agents: Agent[];
   logs: ConsoleLog[];
   steps: WorkflowStep[];
+  finalOutput?: string;
   score?: JudgeScore;
   iterations: number;
   maxIterations: number;

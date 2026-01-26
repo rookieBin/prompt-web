@@ -12,11 +12,11 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      '/api-proxy': {
-        target: 'https://api.hunyuan.cloud.tencent.com',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api-proxy/, ''),
-      },
+      // '/api-proxy': {
+      //   target: 'https://api.hunyuan.cloud.tencent.com',
+      //   changeOrigin: true,
+      //   rewrite: (path) => path.replace(/^\/api-proxy/, ''),
+      // },
     },
   },
 })

@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import type { Bank, Category } from '@/types';
 import { getCategoryStyle } from '../constants/categories';
 
@@ -10,18 +10,50 @@ interface VisualEditorProps {
   isDarkMode: boolean;
 }
 
+export interface VisualEditorHandle {
+  insertVariable: (bankKey: string) => void;
+}
+
 // 变量解析正则
 const VARIABLE_REGEX = /(\{\{[^{}\n]+\}\})/g;
 
-export default function VisualEditor({
-  content,
-  onChange,
-  banks,
-  categories,
-  isDarkMode,
-}: VisualEditorProps) {
+const VisualEditor = forwardRef<VisualEditorHandle, VisualEditorProps>(function VisualEditor(
+  {
+    content,
+    onChange,
+    banks,
+    categories,
+    isDarkMode,
+  }: VisualEditorProps,
+  ref
+) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const preRef = useRef<HTMLPreElement>(null);
+  const pendingSelectionRef = useRef<{ start: number; end: number } | null>(null);
+
+  useEffect(() => {
+    if (!textareaRef.current) return;
+    if (!pendingSelectionRef.current) return;
+
+    const { start, end } = pendingSelectionRef.current;
+    pendingSelectionRef.current = null;
+    textareaRef.current.focus();
+    textareaRef.current.setSelectionRange(start, end);
+  }, [content]);
+
+  useImperativeHandle(ref, () => ({
+    insertVariable: (bankKey: string) => {
+      if (!textareaRef.current) return;
+
+      const insertText = `{{${bankKey}}}`;
+      const start = textareaRef.current.selectionStart ?? content.length;
+      const end = textareaRef.current.selectionEnd ?? content.length;
+      const next = content.slice(0, start) + insertText + content.slice(end);
+      const nextCaret = start + insertText.length;
+      pendingSelectionRef.current = { start: nextCaret, end: nextCaret };
+      onChange(next);
+    },
+  }));
 
   // 同步滚动
   const handleScroll = () => {
@@ -53,7 +85,7 @@ export default function VisualEditor({
             style={{
               backgroundColor: isDarkMode ? style.darkBg : style.lightBg,
               color: isDarkMode ? style.darkText : style.text,
-              border: `1px solid ${style.border}`,
+              boxShadow: `inset 0 0 0 1px ${style.border}`,
             }}
           >
             {part}
@@ -83,4 +115,6 @@ export default function VisualEditor({
       />
     </div>
   );
-}
+});
+
+export default VisualEditor;

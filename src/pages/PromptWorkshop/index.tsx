@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button, Input, Empty, Spin } from 'antd';
 import { EditOutlined, CopyOutlined } from '@ant-design/icons';
 import { useTheme } from '@/contexts/ThemeContext';
 import type { WorkshopTemplate, Bank, Category } from '@/types';
 import { DEFAULT_CATEGORIES } from './constants/categories';
 import { DEFAULT_BANKS, DEFAULT_TEMPLATES } from './constants/banks';
-import VisualEditor from './components/VisualEditor';
+import VisualEditor, { type VisualEditorHandle } from './components/VisualEditor';
 import TemplatePreview from './components/TemplatePreview';
 import TemplateList from './components/TemplateList';
 import BanksSidebar from './components/BanksSidebar';
@@ -30,6 +30,7 @@ export default function PromptWorkshop() {
   const [activeTemplateId, setActiveTemplateId] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState('');
+  const editorRef = useRef<VisualEditorHandle>(null);
 
   // 当前活动模板
   const activeTemplate = templates.find(t => t.id === activeTemplateId) || null;
@@ -163,17 +164,28 @@ export default function PromptWorkshop() {
 
   // 插入变量到编辑器
   const handleInsertVariable = (bankKey: string) => {
-    if (isEditing) {
-      setEditContent(prev => prev + ` {{${bankKey}}} `);
-    }
+    if (!isEditing) return;
+    editorRef.current?.insertVariable(bankKey);
   };
 
   // 词库操作
   const handleAddBankOption = (bankKey: string, option: string) => {
-    const newBanks = banks.map(b =>
-      b.key === bankKey ? { ...b, options: [...b.options, option] } : b
-    );
-    saveBanks(newBanks);
+    const exists = banks.some(b => b.key === bankKey);
+    if (exists) {
+      const newBanks = banks.map(b =>
+        b.key === bankKey ? { ...b, options: [...b.options, option] } : b
+      );
+      saveBanks(newBanks);
+      return;
+    }
+
+    const newBank: Bank = {
+      key: bankKey,
+      label: bankKey,
+      category: 'other',
+      options: [option],
+    };
+    saveBanks([...banks, newBank]);
   };
 
   // 生成最终提示词
@@ -270,6 +282,7 @@ export default function PromptWorkshop() {
             <div className="workshop-main-content">
               {isEditing ? (
                 <VisualEditor
+                  ref={editorRef}
                   content={editContent}
                   onChange={setEditContent}
                   banks={banks}

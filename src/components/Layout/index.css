@@ -73,7 +73,19 @@
 
 .header-button {
   color: var(--text-color) !important;
-  transition: all 0.3s ease;
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 9999px;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.08s ease;
+}
+
+.header-button:hover {
+  background: var(--bg-hover) !important;
+  color: var(--ai-purple) !important;
+}
+
+.header-button:active {
+  transform: translateY(1px);
 }
 
 

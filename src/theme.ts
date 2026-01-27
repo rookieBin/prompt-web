@@ -10,6 +10,8 @@ export function getAntdTheme(mode: ThemeMode): ThemeConfig {
     fontFamily:
       "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, 'Apple Color Emoji', 'Segoe UI Emoji'",
     colorPrimary: '#a855f7',
+    colorPrimaryHover: '#c084fc',
+    colorPrimaryActive: '#9333ea',
     colorInfo: '#3b82f6',
     colorSuccess: '#22c55e',
     colorWarning: '#f59e0b',
@@ -25,6 +27,9 @@ export function getAntdTheme(mode: ThemeMode): ThemeConfig {
 
     lineWidth: 1,
     colorBorderSecondary: isDark ? 'rgba(168, 85, 247, 0.18)' : 'rgba(168, 85, 247, 0.16)',
+
+    controlOutline: 'rgba(168, 85, 247, 0.14)',
+    controlOutlineWidth: 3,
 
     boxShadow:
       '0 10px 30px rgba(15, 23, 42, 0.06), 0 2px 10px rgba(15, 23, 42, 0.04)',
@@ -82,12 +87,28 @@ export function getAntdTheme(mode: ThemeMode): ThemeConfig {
         hoverBorderColor: '#a855f7',
         activeBorderColor: '#a855f7',
       },
+      InputNumber: {
+        borderRadius: 12,
+        controlHeight: 36,
+        controlHeightLG: 40,
+        activeShadow: '0 0 0 3px rgba(168, 85, 247, 0.12)',
+        hoverBorderColor: '#a855f7',
+        activeBorderColor: '#a855f7',
+      },
       Select: {
         borderRadius: 12,
         controlHeight: 36,
         controlHeightLG: 40,
         optionSelectedBg: isDark ? 'rgba(168, 85, 247, 0.18)' : 'rgba(168, 85, 247, 0.10)',
         optionActiveBg: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(2, 6, 23, 0.04)',
+      },
+      DatePicker: {
+        borderRadius: 12,
+        controlHeight: 36,
+        controlHeightLG: 40,
+        activeShadow: '0 0 0 3px rgba(168, 85, 247, 0.12)',
+        hoverBorderColor: '#a855f7',
+        activeBorderColor: '#a855f7',
       },
       Card: {
         borderRadiusLG: 16,
@@ -109,6 +130,11 @@ export function getAntdTheme(mode: ThemeMode): ThemeConfig {
         itemHoverBg: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(2, 6, 23, 0.04)',
         itemSelectedBg: isDark ? 'rgba(168, 85, 247, 0.22)' : 'rgba(168, 85, 247, 0.12)',
         itemSelectedColor: isDark ? 'rgba(255, 255, 255, 0.92)' : 'rgba(15, 23, 42, 0.92)',
+        // 关掉默认的 inline/vertical 右边框
+        itemMarginInline: 0,
+        itemMarginBlock: 0,
+        // 直接覆盖主题 token，去掉边框
+        colorSplit: 'transparent',
       },
       Pagination: {
         borderRadius: 12,

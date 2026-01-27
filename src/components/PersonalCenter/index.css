@@ -29,20 +29,31 @@
 }
 
 .sidebar {
-  ul{
-    height: 100%;
-    border-radius: 10px;
-  }
   width: 250px;
-  /* border-right: 1px solid var(--border-color); */
-  /* background: var(--bg-container); */
-  padding: 24px 0;
-  margin-right: 50px;
+  padding: 16px 12px;
+  margin-right: 24px;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background: var(--bg-base);
+  overflow: hidden;
+}
+
+.sidebar ul {
+  height: 100%;
+  border-radius: 10px;
 }
 
 .sidebar :global(.ant-menu) {
   background: transparent;
-  border: none;
+  border-inline-end: none;
+}
+
+/* 强制覆盖 AntD 运行时生成的 Menu 右边框 */
+.sidebar :global(.ant-menu-light.ant-menu-root.ant-menu-inline),
+.sidebar :global(.ant-menu-light > .ant-menu.ant-menu-root.ant-menu-inline),
+.sidebar :global(.ant-menu-light.ant-menu-root.ant-menu-vertical),
+.sidebar :global(.ant-menu-light > .ant-menu.ant-menu-root.ant-menu-vertical) {
+  border-inline-end: none !important;
 }
 
 .sidebar :global(.ant-menu-item) {

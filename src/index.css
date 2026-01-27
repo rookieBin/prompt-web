@@ -19,46 +19,6 @@
   --ai-gradient-hover: linear-gradient(135deg, #c084fc 0%, #818cf8 50%, #60a5fa 100%);
   --ai-glow: 0 0 20px rgba(168, 85, 247, 0.3);
   --ai-glow-strong: 0 0 30px rgba(168, 85, 247, 0.5);
-
-  /* 覆盖 antd 组件 CSS 变量 */
-  --ant-input-hover-border-color: #a855f7 !important;
-  --ant-input-active-border-color: #a855f7 !important;
-  --ant-input-active-shadow: 0 0 0 2px rgba(168, 85, 247, 0.15);
-  --ant-primary-color: #a855f7;
-  --ant-primary-color-hover: #c084fc;
-  --ant-primary-color-active: #9333ea;
-}
-
-/* 强制覆盖 antd 输入框样式 */
-.ant-input:hover,
-.ant-input-affix-wrapper:hover,
-.ant-input-number:hover,
-.ant-select-selector:hover,
-.ant-picker:hover {
-  border-color: #a855f7 !important;
-}
-
-.ant-input:focus,
-.ant-input-focused,
-.ant-input-affix-wrapper:focus,
-.ant-input-affix-wrapper-focused,
-.ant-input-number:focus,
-.ant-input-number-focused,
-.ant-select-focused .ant-select-selector,
-.ant-picker-focused {
-  border-color: #a855f7 !important;
-  box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.15) !important;
-}
-
-/* 覆盖 antd 按钮主色 */
-.ant-btn-primary {
-  background: #a855f7 !important;
-  border-color: #a855f7 !important;
-}
-
-.ant-btn-primary:hover {
-  background: #c084fc !important;
-  border-color: #c084fc !important;
 }
 
 /* 暗色模式变量 */
@@ -106,8 +66,8 @@ body {
 
 /* 标签间距统一样式 */
 .ant-tag {
-  margin-right: 8px !important;
-  margin-bottom: 8px !important;
+  margin-right: 8px;
+  margin-bottom: 8px;
 }
 
 /* 标签容器样式 */
@@ -118,5 +78,5 @@ body {
 }
 
 .tag-container .ant-tag {
-  margin: 0 !important;
+  margin: 0;
 }

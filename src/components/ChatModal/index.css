@@ -107,19 +107,29 @@
 /* Sender组件样式 */
 .chat-sender :global(.ant-x-sender) {
   background: var(--bg-base);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: none;
+  outline: none;
+}
+
+.chat-sender :global(.ant-x-sender:focus-within) {
+  border-color: var(--ai-purple);
+  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.14);
 }
 
 .chat-sender :global(.ant-input) {
   background: var(--bg-base);
-  border-color: var(--border-color);
+  border-color: transparent;
   color: var(--text-color);
   border-radius: 8px;
   transition: all 0.3s ease;
 }
 
 .chat-sender :global(.ant-input):focus {
-  border-color: var(--ai-purple);
-  box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.1);
+  border-color: transparent;
+  box-shadow: none;
 }
 
 .chat-sender :global(.ant-input)::placeholder {

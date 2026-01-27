@@ -20,7 +20,7 @@ const items: MenuProps['items'] = [
     key: 'architect',
     label: (
       <div>
-        <div>Architect</div>
+        <div>架构师</div>
         <div style={{ fontSize: 12, color: '#999', marginTop: 2 }}>
           将用户想法转化为结构化提示词初稿
         </div>
@@ -31,7 +31,7 @@ const items: MenuProps['items'] = [
     key: 'redteamer',
     label: (
       <div>
-        <div>RedTeamer</div>
+        <div>红队专家</div>
         <div style={{ fontSize: 12, color: '#999', marginTop: 2 }}>
           对提示词进行压力测试，找出潜在问题和漏洞
         </div>
@@ -42,7 +42,7 @@ const items: MenuProps['items'] = [
     key: 'judge',
     label: (
       <div>
-        <div>Judge</div>
+        <div>评审官</div>
         <div style={{ fontSize: 12, color: '#999', marginTop: 2 }}>
           对提示词进行多维度评分和评审
         </div>
@@ -53,7 +53,7 @@ const items: MenuProps['items'] = [
     key: 'adapter',
     label: (
       <div>
-        <div>Adapter</div>
+        <div>适配器</div>
         <div style={{ fontSize: 12, color: '#999', marginTop: 2 }}>
           对提示词进行最终的格式润色和优化
         </div>

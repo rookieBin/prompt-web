@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import type { ComponentProps, ComponentType } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Input, Splitter } from 'antd';
 import NodeConfigPanel from './components/NodeConfigPanel';
@@ -10,13 +11,29 @@ import { useGraphWorkflow } from './hooks/useGraphWorkflow';
 import type { WorkflowNodeData, InteractiveRequest } from './types';
 import './index.css';
 
+type PanelResizeEvent = string | number | { size: string | number };
+type SplitterPanelBaseProps = ComponentProps<typeof Splitter.Panel>;
+
+const ResizableSplitterPanel = Splitter.Panel as unknown as ComponentType<
+  SplitterPanelBaseProps & {
+    onResize?: (event: PanelResizeEvent) => void;
+  }
+>;
+
+const resolvePanelSize = (value: PanelResizeEvent) => (
+  typeof value === 'object' && value !== null ? value.size : value
+);
+
 export default function PromptOptimizer() {
   const location = useLocation();
   const [userInput, setUserInput] = useState('');
   const [selectedNode, setSelectedNode] = useState<{ id: string; data: WorkflowNodeData } | null>(null);
   const [interactiveRequest, setInteractiveRequest] = useState<InteractiveRequest | null>(null);
+  const [interactivePanelSize, setInteractivePanelSize] = useState<string | number>('40%');
+  const [configPanelSize, setConfigPanelSize] = useState<string | number>(360);
   const canvasRef = useRef<WorkflowCanvasHandle>(null);
-  const { logs, finalOutput, isRunning, activeNodeId, failedNodeId, interactiveState, run, reset, continueInteractive, cancelInteractive } = useGraphWorkflow();
+
+  const { logs, finalOutput, isRunning, activeNodeId, completedNodeIds, failedNodeId, interactiveState, run, reset, continueInteractive, cancelInteractive } = useGraphWorkflow();
 
   const initialPrompt = useMemo(() => {
     const state = location.state as { initialPrompt?: string } | null;
@@ -88,7 +105,15 @@ export default function PromptOptimizer() {
                 />
               </div>
             </Splitter.Panel>
-            <Splitter.Panel size={interactiveRequest ? '40%' : 0} min={120} max="60%" resizable={Boolean(interactiveRequest)}>
+            <ResizableSplitterPanel
+              key={interactiveRequest ? 'interactive-open' : 'interactive-closed'}
+              size={interactiveRequest ? interactivePanelSize : 0}
+              defaultSize={0}
+              min={120}
+              max="60%"
+              resizable={Boolean(interactiveRequest)}
+              onResize={(value: PanelResizeEvent) => setInteractivePanelSize(resolvePanelSize(value))}
+            >
               {interactiveRequest && (
                 <InteractivePanel
                   request={interactiveRequest}
@@ -97,7 +122,7 @@ export default function PromptOptimizer() {
                   loading={isRunning}
                 />
               )}
-            </Splitter.Panel>
+            </ResizableSplitterPanel>
           </Splitter>
         </Splitter.Panel>
 
@@ -123,16 +148,20 @@ export default function PromptOptimizer() {
                       <WorkflowCanvas
                         ref={canvasRef}
                         activeNodeId={activeNodeId}
+                        completedNodeIds={completedNodeIds}
                         failedNodeId={failedNodeId}
                         onSelectNode={(n) => setSelectedNode(n)}
                       />
                     </div>
                   </Splitter.Panel>
-                  <Splitter.Panel
-                    size={selectedNode ? 360 : 0}
+                  <ResizableSplitterPanel
+                    key={selectedNode ? 'config-open' : 'config-closed'}
+                    size={selectedNode ? configPanelSize : 0}
+                    defaultSize={0}
                     min={280}
                     max="50%"
                     resizable={Boolean(selectedNode)}
+                    onResize={(value: PanelResizeEvent) => setConfigPanelSize(resolvePanelSize(value))}
                   >
                     <div className={`workflow-main-config ${selectedNode ? '' : 'workflow-main-config--hidden'}`}>
                       <NodeConfigPanel
@@ -140,7 +169,7 @@ export default function PromptOptimizer() {
                         onUpdate={(nodeId, patch) => canvasRef.current?.updateNodeData(nodeId, patch)}
                       />
                     </div>
-                  </Splitter.Panel>
+                  </ResizableSplitterPanel>
                 </Splitter>
               </div>
             </Splitter.Panel>

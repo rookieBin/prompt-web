@@ -17,12 +17,64 @@ export type WorkflowNodeType =
 export interface WorkflowNodeData {
   type: WorkflowNodeType;
   label: string;
+  description?: string;
   config: {
     model?: string;
     temperature?: number;
     maxTokens?: number;
     [key: string]: unknown;
   };
+}
+
+export interface WorkflowNodeMeta {
+  label: string;
+  description: string;
+}
+
+export function getWorkflowNodeMeta(type: WorkflowNodeType): WorkflowNodeMeta {
+  switch (type) {
+    case 'start':
+      return { label: '开始', description: '工作流入口节点，不会对提示词做任何修改' };
+    case 'architect':
+      return { label: '架构师', description: '将用户想法转化为结构化提示词初稿' };
+    case 'redteamer':
+      return { label: '红队专家', description: '对提示词进行压力测试，找出潜在问题和漏洞' };
+    case 'judge':
+      return { label: '评审官', description: '对提示词进行多维度评分和评审' };
+    case 'adapter':
+      return { label: '适配器', description: '对提示词进行最终的格式润色和优化' };
+    case 'prompt_shorten':
+      return { label: '提示词精简', description: '在不改变意图的前提下，尽可能精简提示词' };
+    case 'prompt_expand':
+      return { label: '提示词扩充', description: '把提示词扩充为更完整可执行的模板' };
+    case 'style_formal':
+      return { label: '风格调整（更正式）', description: '把提示词改写为更正式、更专业的风格' };
+    case 'style_casual':
+      return { label: '风格调整（更口语）', description: '把提示词改写为更口语、更亲和的风格' };
+    case 'interactive':
+      return { label: '多轮表单优化', description: '与用户多轮交互，收集信息并生成表单' };
+    default: {
+      const _exhaustive: never = type;
+      return _exhaustive;
+    }
+  }
+}
+
+export function getLegacyEnglishLabel(type: WorkflowNodeType): string | null {
+  switch (type) {
+    case 'start':
+      return 'Start';
+    case 'architect':
+      return 'Architect';
+    case 'redteamer':
+      return 'RedTeamer';
+    case 'judge':
+      return 'Judge';
+    case 'adapter':
+      return 'Adapter';
+    default:
+      return null;
+  }
 }
 
 export interface WorkflowEdgeSnapshot {

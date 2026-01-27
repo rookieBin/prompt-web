@@ -1,6 +1,7 @@
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from 'react';
 import { Graph, Shape } from '@antv/x6';
 import { message } from 'antd';
+import { getLegacyEnglishLabel, getWorkflowNodeMeta } from '../types';
 import type { WorkflowNodeData, WorkflowNodeType, WorkflowSnapshot } from '../types';
 
 export interface WorkflowCanvasHandle {
@@ -12,6 +13,7 @@ export interface WorkflowCanvasHandle {
 
 interface WorkflowCanvasProps {
   activeNodeId: string | null;
+  completedNodeIds: string[];
   failedNodeId?: string | null;
   onSelectNode: (node: { id: string; data: WorkflowNodeData } | null) => void;
 }
@@ -108,35 +110,6 @@ function ensureStartNode(graph: Graph, baseNodeConfig: any) {
   graph.addEdge({ source: { cell: start.id, port: 'out' }, target: { cell: target.id, port: 'in' } });
 }
 
-function getDefaultLabel(type: WorkflowNodeType): string {
-  switch (type) {
-    case 'start':
-      return 'Start';
-    case 'architect':
-      return 'Architect';
-    case 'redteamer':
-      return 'RedTeamer';
-    case 'judge':
-      return 'Judge';
-    case 'adapter':
-      return 'Adapter';
-    case 'prompt_shorten':
-      return '提示词精简';
-    case 'prompt_expand':
-      return '提示词扩充';
-    case 'style_formal':
-      return '风格调整（更正式）';
-    case 'style_casual':
-      return '风格调整（更口语）';
-    case 'interactive':
-      return '多轮表单优化';
-    default: {
-      const _exhaustive: never = type;
-      return _exhaustive;
-    }
-  }
-}
-
 function getNodeStyle(type: WorkflowNodeType) {
   switch (type) {
     case 'start':
@@ -167,9 +140,11 @@ function getNodeStyle(type: WorkflowNodeType) {
 }
 
 function createNodeData(type: WorkflowNodeType): WorkflowNodeData {
+  const meta = getWorkflowNodeMeta(type);
   return {
     type,
-    label: getDefaultLabel(type),
+    label: meta.label,
+    description: meta.description,
     config: {},
   };
 }
@@ -217,7 +192,7 @@ function safeSaveGraphJson(graph: Graph) {
 }
 
 const WorkflowCanvas = forwardRef<WorkflowCanvasHandle, WorkflowCanvasProps>(function WorkflowCanvas(
-  { activeNodeId, failedNodeId, onSelectNode }: WorkflowCanvasProps,
+  { activeNodeId, completedNodeIds, failedNodeId, onSelectNode }: WorkflowCanvasProps,
   ref
 ) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -232,18 +207,70 @@ const WorkflowCanvas = forwardRef<WorkflowCanvasHandle, WorkflowCanvasProps>(fun
 
   const baseNodeConfig = useMemo(
     () => ({
-      width: 200,
-      height: 56,
+      width: 300,
+      height: 90,
+      markup: [
+        { tagName: 'rect', selector: 'glow' },
+        { tagName: 'rect', selector: 'body' },
+        { tagName: 'rect', selector: 'wave' },
+        { tagName: 'foreignObject', selector: 'statusIcon' },
+        { tagName: 'text', selector: 'title' },
+        { tagName: 'text', selector: 'desc' },
+      ],
       attrs: {
+        glow: {
+          rx: 12,
+          ry: 12,
+          stroke: '#22C55E',
+          strokeWidth: 10,
+          fill: 'transparent',
+          opacity: 0,
+          class: 'optimizer-node-glow',
+          pointerEvents: 'none',
+        },
         body: {
           rx: 12,
           ry: 12,
           strokeWidth: 2,
+          class: 'optimizer-node-body',
         },
-        label: {
+        wave: {
+          x: 0,
+          y: 0,
+          width: 300,
+          height: 90,
+          rx: 12,
+          ry: 12,
+          fill: 'rgba(34, 197, 94, 0.15)',
+          opacity: 0,
+          class: 'optimizer-node-wave',
+          pointerEvents: 'none',
+        },
+        statusIcon: {
+          x: 14,
+          y: 14,
+          width: 18,
+          height: 18,
+          html: '',
+        },
+        title: {
+          x: -135,
+          y: -30,
           fontSize: 14,
           fontWeight: 600,
           fill: '#111827',
+          textAnchor: 'start',
+          dominantBaseline: 'hanging',
+          text: '',
+        },
+        desc: {
+          x: -135,
+          y: -10,
+          fontSize: 12,
+          fill: '#6B7280',
+          textAnchor: 'start',
+          dominantBaseline: 'hanging',
+          text: '',
         },
       },
       ports: {
@@ -282,7 +309,7 @@ const WorkflowCanvas = forwardRef<WorkflowCanvasHandle, WorkflowCanvasProps>(fun
     []
   );
 
-  const syncActiveStyle = (activeId: string | null, failedId: string | null = null) => {
+  const syncActiveStyle = (activeId: string | null, completedIds: string[], failedId: string | null = null) => {
     const graph = graphRef.current;
     if (!graph) return;
 
@@ -292,73 +319,76 @@ const WorkflowCanvas = forwardRef<WorkflowCanvasHandle, WorkflowCanvasProps>(fun
       const data = node.getData() as WorkflowNodeData;
       const style = getNodeStyle(data.type);
       const isActive = activeId === node.id;
+      const isCompleted = completedIds.includes(node.id);
       const isFailed = failedId === node.id;
       const isSelected = selectedId === node.id;
+
+      const meta = getWorkflowNodeMeta(data.type);
+      const title = data.label || meta.label;
+      let desc = data.description || meta.description;
       
+      // 描述文字超出22字符时截断
+      if (desc && desc.length > 22) {
+        desc = desc.substring(0, 22) + '...';
+      }
+
+      const hasStatus = isActive || isFailed || isCompleted;
+      const baseX = -135;
+      const titleX = hasStatus ? baseX + 20 : baseX;
+      const descX = hasStatus ? baseX + 20 : baseX;
+      
+      let statusIconHtml = '';
+      if (isActive) {
+        statusIconHtml = '<div style="width:18px;height:18px;display:flex;align-items:center;justify-content:center;color:#F59E0B;font-size:16px;"><svg viewBox="0 0 1024 1024" width="16" height="16" fill="currentColor"><path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm0 820c-205.4 0-372-166.6-372-372s166.6-372 372-372 372 166.6 372 372-166.6 372-372 372z"/><path d="M512 140c-205.4 0-372 166.6-372 372s166.6 372 372 372 372-166.6 372-372-166.6-372-372-372zm0 672c-165.5 0-300-134.5-300-300s134.5-300 300-300 300 134.5 300 300-134.5 300-300 300z"/></svg></div>';
+      } else if (isFailed) {
+        statusIconHtml = '<div style="width:18px;height:18px;display:flex;align-items:center;justify-content:center;color:#EF4444;font-size:16px;"><svg viewBox="64 64 896 896" width="16" height="16" fill="currentColor"><path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm165.4 618.2l-66-.3L512 563.4l-99.3 118.4-66.1.3c-4.4 0-8-3.5-8-8 0-1.9.7-3.7 1.9-5.2l130.1-155L340.5 359a8.32 8.32 0 01-1.9-5.2c0-4.4 3.6-8 8-8l66.1.3L512 464.6l99.3-118.4 66-.3c4.4 0 8 3.5 8 8 0 1.9-.7 3.7-1.9 5.2L553.5 514l130 155c1.2 1.5 1.9 3.3 1.9 5.2 0 4.4-3.6 8-8 8z"/></svg></div>';
+      } else if (isCompleted) {
+        statusIconHtml = '<div style="width:18px;height:18px;display:flex;align-items:center;justify-content:center;color:#22C55E;font-size:16px;"><svg viewBox="64 64 896 896" width="16" height="16" fill="currentColor"><path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm193.5 301.7l-210.6 292a31.8 31.8 0 01-51.7 0L318.5 484.9c-3.8-5.3 0-12.7 6.5-12.7h46.9c10.2 0 19.9 4.9 25.9 13.3l71.2 98.8 157.2-218c6-8.3 15.6-13.3 25.9-13.3H699c6.5 0 10.3 7.4 6.5 12.7z"/></svg></div>';
+      }
+
+      const statusClass = [
+        isActive && 'optimizer-node--running',
+        isCompleted && 'optimizer-node--completed',
+        isFailed && 'optimizer-node--failed',
+      ].filter(Boolean).join(' ');
+
       // 设置节点样式
       node.setAttrs({
+        glow: {
+          opacity: isActive ? 1 : 0,
+        },
         body: {
+          class: ['optimizer-node-body', statusClass].filter(Boolean).join(' '),
           fill: isFailed ? '#FEF2F2' : style.fill,
           stroke: isActive ? '#22C55E' : isFailed ? '#EF4444' : isSelected ? '#3B82F6' : style.stroke,
           strokeWidth: isActive || isFailed || isSelected ? 3 : 2,
         },
-        label: {
-          text: data.label,
+        wave: {
+          opacity: isActive ? 1 : 0,
+        },
+        statusIcon: {
+          html: statusIconHtml,
+        },
+        title: {
+          x: titleX,
+          text: title,
+        },
+        desc: {
+          x: descX,
+          text: desc,
         },
       });
 
-      // 添加波浪动画效果
-      if (isActive) {
-        node.setAttrs({
-          body: {
-            fill: isFailed ? '#FEF2F2' : style.fill,
-            stroke: '#22C55E',
-            strokeWidth: 3,
-            strokeDasharray: '5,5',
-            strokeDashoffset: 0,
-          },
-        });
-        
-        // 创建动画
-        if (!(node as any)._animated) {
-          (node as any)._animated = true;
-          let offset = 0;
-          const animate = () => {
-            offset = (offset + 0.1) % 10; // 减慢动画速度
-            node.setAttrs({
-              body: {
-                strokeDashoffset: offset,
-              },
-            });
-            if ((node as any)._animated) {
-              requestAnimationFrame(animate);
-            }
-          };
-          animate();
-        }
-        
-        node.toFront();
-      } else {
-        // 移除动画
-        (node as any)._animated = false;
-        node.setAttrs({
-          body: {
-            fill: isFailed ? '#FEF2F2' : style.fill,
-            stroke: isFailed ? '#EF4444' : isSelected ? '#3B82F6' : style.stroke,
-            strokeWidth: isFailed || isSelected ? 3 : 2,
-            strokeDasharray: null,
-            strokeDashoffset: null,
-          },
-        });
-      }
+      node.toFront();
     });
 
-    const activeOutgoing = new Set<string>();
+    // 活跃节点的入边应该显示动画（数据流向活跃节点）
+    const activeIncoming = new Set<string>();
     if (activeId) {
       graph.getEdges().forEach((edge: any) => {
-        const src = edge.getSourceCellId?.() || '';
-        if (src === activeId) {
-          activeOutgoing.add(edge.id);
+        const target = edge.getTargetCellId?.() || '';
+        if (target === activeId) {
+          activeIncoming.add(edge.id);
         }
       });
     }
@@ -374,51 +404,35 @@ const WorkflowCanvas = forwardRef<WorkflowCanvasHandle, WorkflowCanvasProps>(fun
     }
 
     graph.getEdges().forEach((edge: any) => {
-      const isActiveEdge = activeOutgoing.has(edge.id);
+      const isActiveEdge = activeIncoming.has(edge.id);
       const isFailedEdge = failedOutgoing.has(edge.id);
       const isSelectedEdge = selectedId === edge.id;
       
-      // 设置边的样式和动画
+      // 设置边的样式
       edge.setAttrs({
         line: {
-          class: isActiveEdge ? 'x6-edge-line--active' : '',
           stroke: isActiveEdge ? '#22C55E' : isFailedEdge ? '#EF4444' : isSelectedEdge ? '#3B82F6' : '#6B7280',
-          strokeWidth: 2,
-          strokeDasharray: isActiveEdge ? '6,6' : null,
+          strokeWidth: isActiveEdge || isFailedEdge || isSelectedEdge ? 3 : 2,
+          strokeDasharray: isActiveEdge ? '8 4' : null,
           targetMarker: {
             name: 'block',
             width: 12,
             height: 8,
+            fill: isActiveEdge ? '#22C55E' : isFailedEdge ? '#EF4444' : isSelectedEdge ? '#3B82F6' : '#6B7280',
           },
         },
       });
       
-      // 为活跃边添加动画
-      if (isActiveEdge) {
-        if (!(edge as any)._animated) {
-          (edge as any)._animated = true;
-          let offset = 0;
-          const animateEdge = () => {
-            offset = (offset + 0.1) % 12;
-            edge.setAttrs({
-              line: {
-                strokeDashoffset: offset,
-              },
-            });
-            if ((edge as any)._animated) {
-              requestAnimationFrame(animateEdge);
-            }
-          };
-          animateEdge();
+      const edgeView = graph.findViewByCell(edge);
+      if (edgeView) {
+        const lineElem = edgeView.container.querySelector('.x6-edge-line') as SVGElement | null;
+        if (lineElem) {
+          if (isActiveEdge) {
+            lineElem.classList.add('x6-edge-line--active');
+          } else {
+            lineElem.classList.remove('x6-edge-line--active');
+          }
         }
-      } else {
-        // 移除边动画
-        (edge as any)._animated = false;
-        edge.setAttrs({
-          line: {
-            strokeDashoffset: null,
-          },
-        });
       }
     });
   };
@@ -525,6 +539,24 @@ const WorkflowCanvas = forwardRef<WorkflowCanvasHandle, WorkflowCanvasProps>(fun
       safeSaveGraphJson(graph);
     } else {
       ensureStartNode(graph, baseNodeConfig);
+
+      graph.getNodes().forEach((node: any) => {
+        const prev = node.getData?.() as WorkflowNodeData | undefined;
+        if (!prev) return;
+
+        const meta = getWorkflowNodeMeta(prev.type);
+        const legacyLabel = getLegacyEnglishLabel(prev.type);
+        const shouldLocalizeLabel = legacyLabel ? prev.label === legacyLabel : false;
+
+        const next: WorkflowNodeData = {
+          ...prev,
+          label: shouldLocalizeLabel ? meta.label : (prev.label || meta.label),
+          description: prev.description || meta.description,
+          config: prev.config || {},
+        };
+        node.setData(next);
+      });
+
       safeSaveGraphJson(graph);
     }
 
@@ -534,7 +566,7 @@ const WorkflowCanvas = forwardRef<WorkflowCanvasHandle, WorkflowCanvasProps>(fun
       selectedCellIdRef.current = node.id;
       const data = node.getData() as WorkflowNodeData;
       onSelectNodeRef.current({ id: node.id, data });
-      syncActiveStyle(activeNodeIdRef.current);
+      syncActiveStyle(activeNodeIdRef.current, completedNodeIds);
     });
 
     graph.on('edge:click', (args: any) => {
@@ -542,7 +574,7 @@ const WorkflowCanvas = forwardRef<WorkflowCanvasHandle, WorkflowCanvasProps>(fun
       if (!edge) return;
       selectedCellIdRef.current = edge.id;
       onSelectNodeRef.current(null);
-      syncActiveStyle(activeNodeIdRef.current);
+      syncActiveStyle(activeNodeIdRef.current, completedNodeIds);
     });
 
     graph.on('edge:connected', (args: any) => {
@@ -558,14 +590,14 @@ const WorkflowCanvas = forwardRef<WorkflowCanvasHandle, WorkflowCanvasProps>(fun
         safeSaveGraphJson(graph);
         selectedCellIdRef.current = null;
         onSelectNodeRef.current(null);
-        syncActiveStyle(activeNodeIdRef.current);
+        syncActiveStyle(activeNodeIdRef.current, completedNodeIds);
       }
     });
 
     graph.on('blank:click', () => {
       selectedCellIdRef.current = null;
       onSelectNodeRef.current(null);
-      syncActiveStyle(activeNodeIdRef.current);
+      syncActiveStyle(activeNodeIdRef.current, completedNodeIds);
     });
 
     graph.on('cell:removed', () => {
@@ -599,19 +631,19 @@ const WorkflowCanvas = forwardRef<WorkflowCanvasHandle, WorkflowCanvasProps>(fun
 
     window.addEventListener('keydown', handleKeyDown);
 
-    syncActiveStyle(null);
+    syncActiveStyle(null, completedNodeIds);
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       graph.dispose();
       graphRef.current = null;
     };
-  }, [baseNodeConfig]);
+  }, [baseNodeConfig, completedNodeIds]);
 
   useEffect(() => {
     activeNodeIdRef.current = activeNodeId;
-    syncActiveStyle(activeNodeId, failedNodeId);
-  }, [activeNodeId, failedNodeId]);
+    syncActiveStyle(activeNodeId, completedNodeIds, failedNodeId);
+  }, [activeNodeId, completedNodeIds, failedNodeId]);
 
   useImperativeHandle(ref, () => ({
     addNode: (type: WorkflowNodeType) => {
@@ -621,12 +653,13 @@ const WorkflowCanvas = forwardRef<WorkflowCanvasHandle, WorkflowCanvasProps>(fun
       const center = graph.getGraphArea().getCenter();
       const data = createNodeData(type);
       const style = getNodeStyle(type);
+      const meta = getWorkflowNodeMeta(type);
 
       const node = graph.addNode({
         ...baseNodeConfig,
         id: `node-${Date.now()}-${type}`,
-        x: center.x - 100,
-        y: center.y - 28,
+        x: center.x - (baseNodeConfig.width / 2),
+        y: center.y - (baseNodeConfig.height / 2),
         data,
         attrs: {
           body: {
@@ -634,9 +667,17 @@ const WorkflowCanvas = forwardRef<WorkflowCanvasHandle, WorkflowCanvasProps>(fun
             fill: style.fill,
             stroke: style.stroke,
           },
-          label: {
-            ...baseNodeConfig.attrs.label,
-            text: data.label,
+          statusIcon: {
+            ...baseNodeConfig.attrs.statusIcon,
+            html: '',
+          },
+          title: {
+            ...baseNodeConfig.attrs.title,
+            text: data.label || meta.label,
+          },
+          desc: {
+            ...baseNodeConfig.attrs.desc,
+            text: data.description || meta.description,
           },
         },
       });
@@ -678,14 +719,51 @@ const WorkflowCanvas = forwardRef<WorkflowCanvasHandle, WorkflowCanvasProps>(fun
 
       const style = getNodeStyle(next.type);
       const isActive = activeNodeId === nodeId;
+      const meta = getWorkflowNodeMeta(next.type);
+
+      const isFailed = failedNodeId === nodeId;
+      const isCompleted = completedNodeIds.includes(nodeId);
+      const hasStatus = isActive || isFailed || isCompleted;
+      const baseX = -135;
+      const titleX = hasStatus ? baseX + 20 : baseX;
+      const descX = hasStatus ? baseX + 20 : baseX;
+      
+      // 处理描述文字截断
+      let desc = next.description || meta.description;
+      if (desc && desc.length > 22) {
+        desc = desc.substring(0, 22) + '...';
+      }
+      
+      let statusIconHtml = '';
+      if (isActive) {
+        statusIconHtml = '<div style="width:18px;height:18px;display:flex;align-items:center;justify-content:center;color:#F59E0B;font-size:16px;"><svg viewBox="0 0 1024 1024" width="16" height="16" fill="currentColor"><path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm0 820c-205.4 0-372-166.6-372-372s166.6-372 372-372 372 166.6 372 372-166.6 372-372 372z"/><path d="M512 140c-205.4 0-372 166.6-372 372s166.6 372 372 372 372-166.6 372-372-166.6-372-372-372zm0 672c-165.5 0-300-134.5-300-300s134.5-300 300-300 300 134.5 300 300-134.5 300-300 300z"/></svg></div>';
+      } else if (isFailed) {
+        statusIconHtml = '<div style="width:18px;height:18px;display:flex;align-items:center;justify-content:center;color:#EF4444;font-size:16px;"><svg viewBox="64 64 896 896" width="16" height="16" fill="currentColor"><path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm165.4 618.2l-66-.3L512 563.4l-99.3 118.4-66.1.3c-4.4 0-8-3.5-8-8 0-1.9.7-3.7 1.9-5.2l130.1-155L340.5 359a8.32 8.32 0 01-1.9-5.2c0-4.4 3.6-8 8-8l66.1.3L512 464.6l99.3-118.4 66-.3c4.4 0 8 3.5 8 8 0 1.9-.7 3.7-1.9 5.2L553.5 514l130 155c1.2 1.5 1.9 3.3 1.9 5.2 0 4.4-3.6 8-8 8z"/></svg></div>';
+      } else if (isCompleted) {
+        statusIconHtml = '<div style="width:18px;height:18px;display:flex;align-items:center;justify-content:center;color:#22C55E;font-size:16px;"><svg viewBox="64 64 896 896" width="16" height="16" fill="currentColor"><path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm193.5 301.7l-210.6 292a31.8 31.8 0 01-51.7 0L318.5 484.9c-3.8-5.3 0-12.7 6.5-12.7h46.9c10.2 0 19.9 4.9 25.9 13.3l71.2 98.8 157.2-218c6-8.3 15.6-13.3 25.9-13.3H699c6.5 0 10.3 7.4 6.5 12.7z"/></svg></div>';
+      }
 
       node.setAttrs({
         body: {
           fill: style.fill,
           stroke: isActive ? '#22C55E' : style.stroke,
         },
-        label: {
-          text: next.label,
+        glow: {
+          opacity: isActive ? 1 : 0,
+        },
+        wave: {
+          opacity: isActive ? 1 : 0,
+        },
+        statusIcon: {
+          html: statusIconHtml,
+        },
+        title: {
+          x: titleX,
+          text: next.label || meta.label,
+        },
+        desc: {
+          x: descX,
+          text: next.description || meta.description,
         },
       });
 

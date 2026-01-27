@@ -202,6 +202,89 @@
   height: 100%;
 }
 
+.optimizer-node--running :global(.optimizer-node-glow) {
+  animation: optimizerNodeGlowPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes optimizerNodeGlowPulse {
+  0% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 0.65;
+  }
+  100% {
+    opacity: 0.25;
+  }
+}
+
+/* 执行中节点的波浪特效 */
+:global(.optimizer-node-wave) {
+  animation: optimizerNodeWave 2s linear infinite;
+}
+
+@keyframes optimizerNodeWave {
+  0% {
+    transform: translateX(-300px);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.4;
+  }
+  90% {
+    opacity: 0.4;
+  }
+  100% {
+    transform: translateX(300px);
+    opacity: 0;
+  }
+}
+
+/* 执行中边的绿色虚线动画 */
+:global(.x6-edge-line.x6-edge-line--active) {
+  stroke: #22C55E !important;
+  stroke-width: 3 !important;
+  stroke-dasharray: 8 4 !important;
+  animation: x6EdgeActiveFlow 1s linear infinite !important;
+}
+
+/* 更强的选择器 */
+:global(.x6-graph .x6-edge-line.x6-edge-line--active) {
+  stroke: #22C55E !important;
+  stroke-width: 3 !important;
+  stroke-dasharray: 8 4 !important;
+  animation: x6EdgeActiveFlow 1s linear infinite !important;
+}
+
+@keyframes x6EdgeActiveFlow {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: -12;
+  }
+}
+
+/* 确保动画在所有情况下都能工作 */
+@keyframes x6EdgeActiveFlowStrong {
+  0% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: -24;
+  }
+}
+
+/* 备用动画方案 */
+@keyframes x6EdgeActiveFlowAlt {
+  0% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: -24;
+  }
+}
+
 .node-config-panel {
   height: 100%;
 }
@@ -276,16 +359,6 @@
   overflow: hidden;
 }
 
-.x6-edge-line--active {
-  stroke-dasharray: 6 6;
-  animation: x6dash 0.9s linear infinite;
-}
-
-@keyframes x6dash {
-  to {
-    stroke-dashoffset: -12;
-  }
-}
 
 .output-left {
   flex: 1;

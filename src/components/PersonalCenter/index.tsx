@@ -65,8 +65,10 @@ export default function PersonalCenter({ visible, onClose, user, onUserUpdate }:
       footer={null}
       width="88vw"
       style={{ top: 32, maxWidth: 1100, padding: 0 }}
-      styles={{ body: { height: '72vh', minHeight: 520, padding: 0 } }}
-      maskStyle={{ backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)' }}
+      styles={{
+        body: { height: '72vh', minHeight: 520, padding: 0 },
+        mask: { backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)' },
+      }}
       className="personal-center-modal"
     >
       <div className="personal-center-layout">

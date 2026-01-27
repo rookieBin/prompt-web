@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Card, Form, Input, InputNumber, Slider, Select, Empty } from 'antd';
+import { getWorkflowNodeMeta } from '../types';
 import type { WorkflowNodeData } from '../types';
 
 interface NodeConfigPanelProps {
@@ -10,6 +11,7 @@ interface NodeConfigPanelProps {
 export default function NodeConfigPanel({ selected, onUpdate }: NodeConfigPanelProps) {
   const [form] = Form.useForm<{
     label: string;
+    description?: string;
     model?: string;
     temperature?: number;
     maxTokens?: number;
@@ -23,6 +25,7 @@ export default function NodeConfigPanel({ selected, onUpdate }: NodeConfigPanelP
 
     form.setFieldsValue({
       label: selected.data.label,
+      description: selected.data.description,
       model: selected.data.config.model,
       temperature: selected.data.config.temperature,
       maxTokens: selected.data.config.maxTokens,
@@ -36,7 +39,11 @@ export default function NodeConfigPanel({ selected, onUpdate }: NodeConfigPanelP
       size="small"
       className="node-config-panel"
       title="节点配置"
-      extra={selected ? <span className="node-config-type">{selected.data.type}</span> : null}
+      extra={
+        selected ? (
+          <span className="node-config-type">{getWorkflowNodeMeta(selected.data.type).label}</span>
+        ) : null
+      }
     >
       {!selected && <Empty description="请选择一个节点" />}
       <Form
@@ -47,6 +54,7 @@ export default function NodeConfigPanel({ selected, onUpdate }: NodeConfigPanelP
           if (!selected) return;
           onUpdate(selected.id, {
             label: values.label,
+            description: values.description,
             config: {
               ...(showModel ? { model: values.model } : {}),
               temperature: values.temperature,
@@ -57,6 +65,10 @@ export default function NodeConfigPanel({ selected, onUpdate }: NodeConfigPanelP
       >
         <Form.Item label="名称" name="label" rules={[{ required: true, message: '请输入名称' }]}>
           <Input />
+        </Form.Item>
+
+        <Form.Item label="功能描述" name="description">
+          <Input.TextArea autoSize={{ minRows: 2, maxRows: 4 }} />
         </Form.Item>
 
         {showModel && (

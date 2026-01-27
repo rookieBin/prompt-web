@@ -12,6 +12,7 @@ interface GraphWorkflowState {
   score?: JudgeScore;
   finalOutput?: string;
   activeNodeId: string | null;
+  completedNodeIds: string[];
   failedNodeId?: string | null;
   interactiveState?: InteractiveState;
   interactiveAgent?: InteractiveAgent; // 保持 InteractiveAgent 实例
@@ -251,6 +252,7 @@ export function useGraphWorkflow() {
     status: 'idle',
     logs: [],
     activeNodeId: null,
+    completedNodeIds: [],
   });
 
   const stateRef = useRef<GraphWorkflowState>(state);
@@ -275,7 +277,7 @@ export function useGraphWorkflow() {
   } | null>(null);
 
   const reset = useCallback(() => {
-    setState({ status: 'idle', logs: [], activeNodeId: null, score: undefined, finalOutput: undefined, failedNodeId: null, interactiveState: undefined, interactiveAgent: undefined, resumeFromNodeId: undefined, resumeInput: undefined, savedUserInput: undefined, savedSnapshot: undefined, pendingExecution: undefined });
+    setState({ status: 'idle', logs: [], activeNodeId: null, completedNodeIds: [], score: undefined, finalOutput: undefined, failedNodeId: null, interactiveState: undefined, interactiveAgent: undefined, resumeFromNodeId: undefined, resumeInput: undefined, savedUserInput: undefined, savedSnapshot: undefined, pendingExecution: undefined });
     setPendingExecution(null);
   }, []);
 
@@ -338,6 +340,17 @@ export function useGraphWorkflow() {
               `检查保存的参数: savedUserInput长度=${snapshot.savedUserInput?.length || 0}, savedSnapshot存在=${!!snapshot.savedSnapshot}`,
               'info'
             );
+
+            // 标记该 interactive 节点已完成（用于画布上显示成功图标）
+            const completedInteractiveId = snapshot.interactiveState?.nodeId;
+            if (completedInteractiveId) {
+              setState((prev) => ({
+                ...prev,
+                completedNodeIds: prev.completedNodeIds.includes(completedInteractiveId)
+                  ? prev.completedNodeIds
+                  : [...prev.completedNodeIds, completedInteractiveId],
+              }));
+            }
 
             if (snapshot.savedUserInput && snapshot.savedSnapshot) {
               const resumeNodeId = snapshot.interactiveState?.nodeId;
@@ -449,6 +462,7 @@ export function useGraphWorkflow() {
           status: 'running',
           logs: [],
           activeNodeId: null,
+          completedNodeIds: [],
           score: undefined,
           finalOutput: undefined,
           failedNodeId: null,
@@ -522,6 +536,10 @@ export function useGraphWorkflow() {
           }
 
           appendLog('system', `完成: ${n.data.label}`, 'success');
+          setState((prev) => ({
+            ...prev,
+            completedNodeIds: prev.completedNodeIds.includes(n.id) ? prev.completedNodeIds : [...prev.completedNodeIds, n.id],
+          }));
         }
 
         setState((prev) => ({
@@ -564,6 +582,7 @@ export function useGraphWorkflow() {
     finalOutput: state.finalOutput,
     isRunning: state.status === 'running',
     activeNodeId: state.activeNodeId,
+    completedNodeIds: state.completedNodeIds,
     failedNodeId: state.failedNodeId,
     interactiveState: state.interactiveState,
     run,

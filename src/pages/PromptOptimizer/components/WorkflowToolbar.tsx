@@ -61,45 +61,23 @@ const items: MenuProps['items'] = [
     ),
   },
   {
-    key: 'prompt_shorten',
+    key: 'length_adjust',
     label: (
       <div>
-        <div>提示词精简</div>
+        <div>长度调整</div>
         <div style={{ fontSize: 12, color: '#999', marginTop: 2 }}>
-          在不改变意图的前提下，尽可能精简提示词
+          根据目标字数自动裁剪或扩写提示词
         </div>
       </div>
     ),
   },
   {
-    key: 'prompt_expand',
+    key: 'style_adjust',
     label: (
       <div>
-        <div>提示词扩充</div>
+        <div>风格调整</div>
         <div style={{ fontSize: 12, color: '#999', marginTop: 2 }}>
-          把提示词扩充为更完整可执行的模板
-        </div>
-      </div>
-    ),
-  },
-  {
-    key: 'style_formal',
-    label: (
-      <div>
-        <div>风格调整（更正式）</div>
-        <div style={{ fontSize: 12, color: '#999', marginTop: 2 }}>
-          把提示词改写为更正式、更专业的风格
-        </div>
-      </div>
-    ),
-  },
-  {
-    key: 'style_casual',
-    label: (
-      <div>
-        <div>风格调整（更口语）</div>
-        <div style={{ fontSize: 12, color: '#999', marginTop: 2 }}>
-          把提示词改写为更口语、更亲和的风格
+          选择目标语气并重写提示词风格
         </div>
       </div>
     ),

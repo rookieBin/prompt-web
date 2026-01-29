@@ -5,13 +5,13 @@ export type AgentState = 'idle' | 'running' | 'completed' | 'failed';
 export type AgentType = 'architect' | 'redteamer' | 'judge' | 'adapter';
 
 // 编排节点类型（扩展：支持新增节点）
+export type StyleAdjustMode = 'formal' | 'casual';
+
 export type WorkflowNodeType =
   | 'start'
   | AgentType
-  | 'prompt_shorten'
-  | 'prompt_expand'
-  | 'style_formal'
-  | 'style_casual'
+  | 'length_adjust'
+  | 'style_adjust'
   | 'interactive';
 
 export interface WorkflowNodeData {
@@ -20,8 +20,9 @@ export interface WorkflowNodeData {
   description?: string;
   config: {
     model?: string;
-    temperature?: number;
-    maxTokens?: number;
+    targetModel?: string;
+    targetLength?: number;
+    styleMode?: StyleAdjustMode;
     [key: string]: unknown;
   };
 }
@@ -43,14 +44,10 @@ export function getWorkflowNodeMeta(type: WorkflowNodeType): WorkflowNodeMeta {
       return { label: '评审官', description: '对提示词进行多维度评分和评审' };
     case 'adapter':
       return { label: '适配器', description: '对提示词进行最终的格式润色和优化' };
-    case 'prompt_shorten':
-      return { label: '提示词精简', description: '在不改变意图的前提下，尽可能精简提示词' };
-    case 'prompt_expand':
-      return { label: '提示词扩充', description: '把提示词扩充为更完整可执行的模板' };
-    case 'style_formal':
-      return { label: '风格调整（更正式）', description: '把提示词改写为更正式、更专业的风格' };
-    case 'style_casual':
-      return { label: '风格调整（更口语）', description: '把提示词改写为更口语、更亲和的风格' };
+    case 'length_adjust':
+      return { label: '长度调整', description: '根据目标字数自动裁剪或扩写提示词' };
+    case 'style_adjust':
+      return { label: '风格调整', description: '保持内容不变，选择目标语气并重写提示词' };
     case 'interactive':
       return { label: '多轮表单优化', description: '与用户多轮交互，收集信息并生成表单' };
     default: {

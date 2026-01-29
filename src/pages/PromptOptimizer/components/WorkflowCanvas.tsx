@@ -122,14 +122,10 @@ function getNodeStyle(type: WorkflowNodeType) {
       return { fill: '#FFFBEB', stroke: '#F59E0B' };
     case 'adapter':
       return { fill: '#ECFDF5', stroke: '#10B981' };
-    case 'prompt_shorten':
+    case 'length_adjust':
       return { fill: '#F5F3FF', stroke: '#8B5CF6' };
-    case 'prompt_expand':
-      return { fill: '#F0FDFA', stroke: '#14B8A6' };
-    case 'style_formal':
+    case 'style_adjust':
       return { fill: '#EFF6FF', stroke: '#3B82F6' };
-    case 'style_casual':
-      return { fill: '#FDF2F8', stroke: '#EC4899' };
     case 'interactive':
       return { fill: '#F0F9FF', stroke: '#0EA5E9' };
     default: {
@@ -145,7 +141,12 @@ function createNodeData(type: WorkflowNodeType): WorkflowNodeData {
     type,
     label: meta.label,
     description: meta.description,
-    config: {},
+    config:
+      type === 'style_adjust'
+        ? { styleMode: 'formal' }
+        : type === 'length_adjust'
+          ? { targetLength: 200 }
+          : {},
   };
 }
 
@@ -199,6 +200,8 @@ const WorkflowCanvas = forwardRef<WorkflowCanvasHandle, WorkflowCanvasProps>(fun
   const graphRef = useRef<Graph | null>(null);
   const selectedCellIdRef = useRef<string | null>(null);
   const activeNodeIdRef = useRef<string | null>(null);
+  const completedNodeIdsRef = useRef<string[]>([]);
+  const failedNodeIdRef = useRef<string | null>(null);
   const onSelectNodeRef = useRef(onSelectNode);
 
   useEffect(() => {
@@ -631,17 +634,19 @@ const WorkflowCanvas = forwardRef<WorkflowCanvasHandle, WorkflowCanvasProps>(fun
 
     window.addEventListener('keydown', handleKeyDown);
 
-    syncActiveStyle(null, completedNodeIds);
+    syncActiveStyle(activeNodeIdRef.current, completedNodeIdsRef.current, failedNodeIdRef.current);
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       graph.dispose();
       graphRef.current = null;
     };
-  }, [baseNodeConfig, completedNodeIds]);
+  }, [baseNodeConfig]);
 
   useEffect(() => {
     activeNodeIdRef.current = activeNodeId;
+    completedNodeIdsRef.current = completedNodeIds;
+    failedNodeIdRef.current = failedNodeId ?? null;
     syncActiveStyle(activeNodeId, completedNodeIds, failedNodeId);
   }, [activeNodeId, completedNodeIds, failedNodeId]);
 

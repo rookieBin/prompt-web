@@ -1,8 +1,21 @@
+import type { AIConfig } from '@/types';
 import { BaseAgent } from './BaseAgent';
 
 export class AdapterAgent extends BaseAgent {
+  private targetModel?: string;
+
+  constructor(config: AIConfig, targetModel?: string) {
+    super(config);
+    this.targetModel = targetModel;
+  }
+
   protected getSystemPrompt(): string {
-    return `你是一个专业的提示词适配器（Prompt Adapter）。你的任务是对提示词进行最终的格式润色和优化。
+    const targetGuide = this.targetModel
+      ? `请针对「${this.targetModel}」模型的语言与结构偏好进行适配。`
+      : '请按主流大型语言模型的通用偏好进行适配。';
+    const modelHint = this.targetModel ?? '主流模型（如 GPT、Claude、DeepSeek）';
+
+    return `你是一个专业的提示词适配器（Prompt Adapter）。你的任务是对提示词进行最终的格式润色和优化。${targetGuide}
 
 ⚠️ 关键说明 - 请务必理解：
 你收到的输入是一个"提示词模板"，你的输出也必须是"提示词模板"！
@@ -20,7 +33,7 @@ export class AdapterAgent extends BaseAgent {
 你需要：
 1. 优化提示词的语言表达，使其更加专业和流畅
 2. 调整格式，确保结构清晰、层次分明
-3. 针对目标AI模型（如Claude、GPT等）进行适配优化
+3. 针对目标AI模型（如${modelHint}）进行适配优化，匹配其语气与指令偏好
 4. 添加必要的格式标记和分隔符
 5. 确保最终输出的可读性和可用性
 

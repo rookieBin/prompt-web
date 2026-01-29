@@ -287,6 +287,12 @@
 
 .node-config-panel {
   height: 100%;
+  border-radius: 0;
+  border: 1px solid var(--border-color);
+}
+
+.node-config-panel :global(.ant-card-body) {
+  padding: 16px;
 }
 
 .node-config-type {

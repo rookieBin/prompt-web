@@ -1,7 +1,7 @@
 import { useCallback, useState, useEffect, useRef } from 'react';
 import type { AIConfig } from '@/types';
 import { aiConfigApi } from '@/api';
-import type { ConsoleLog, JudgeScore, WorkflowNodeData, WorkflowNodeSnapshot, WorkflowNodeType, WorkflowSnapshot, InteractiveState } from '../types';
+import type { ConsoleLog, JudgeScore, WorkflowNodeData, WorkflowNodeSnapshot, WorkflowSnapshot, InteractiveState } from '../types';
 import { AdapterAgent, ArchitectAgent, JudgeAgent, RedTeamerAgent } from '../agents';
 import { InteractiveAgent } from '../agents/InteractiveAgent';
 import { chatApi } from '@/api';
@@ -109,27 +109,29 @@ function mergeConfig(base: AIConfig, nodeConfig: WorkflowNodeData['config']): AI
   return {
     ...base,
     model: typeof nodeConfig.model === 'string' && nodeConfig.model ? nodeConfig.model : base.model,
-    temperature: typeof nodeConfig.temperature === 'number' ? nodeConfig.temperature : base.temperature,
-    maxTokens: typeof nodeConfig.maxTokens === 'number' ? nodeConfig.maxTokens : base.maxTokens,
   };
 }
 
-async function executeTransformNode(input: string, config: AIConfig, type: WorkflowNodeType): Promise<string> {
+async function executeTransformNode(input: string, config: AIConfig, node: WorkflowNodeData): Promise<string> {
   let systemPrompt = '';
+  const { type } = node;
 
   switch (type) {
-    case 'prompt_shorten':
-      systemPrompt = '你是一个提示词编辑器。任务：在不改变意图的前提下，尽可能精简提示词，去掉冗余，保留关键约束与结构。输出必须仍然是提示词模板，不要执行任务。';
+    case 'length_adjust': {
+      const targetLength = typeof node.config.targetLength === 'number' && node.config.targetLength > 0
+        ? node.config.targetLength
+        : 200;
+      systemPrompt = `你是一个提示词长度调整器。任务：保持意图不变，将提示词裁剪或扩写为约 ${targetLength} 字，确保结构和关键约束完整。输出必须仍然是提示词模板，不要执行任务。`;
       break;
-    case 'prompt_expand':
-      systemPrompt = '你是一个提示词扩写器。任务：在不改变意图的前提下，把提示词扩充为更完整可执行的模板，补充结构化要素（角色/任务/输入输出/约束/示例）。输出必须仍然是提示词模板，不要执行任务。';
+    }
+    case 'style_adjust': {
+      const mode = node.config.styleMode === 'casual' ? 'casual' : 'formal';
+      systemPrompt =
+        mode === 'casual'
+          ? '你是一个提示词风格调整器。任务：保持内容不变，把提示词改写为更口语、更亲和但仍清晰可执行的风格。输出必须仍然是提示词模板，不要执行任务。'
+          : '你是一个提示词风格调整器。任务：保持内容不变，把提示词改写为更正式、更专业、更清晰的风格。输出必须仍然是提示词模板，不要执行任务。';
       break;
-    case 'style_formal':
-      systemPrompt = '你是一个提示词风格调整器。任务：保持内容不变，把提示词改写为更正式、更专业、更清晰的风格。输出必须仍然是提示词模板，不要执行任务。';
-      break;
-    case 'style_casual':
-      systemPrompt = '你是一个提示词风格调整器。任务：保持内容不变，把提示词改写为更口语、更亲和但仍清晰可执行的风格。输出必须仍然是提示词模板，不要执行任务。';
-      break;
+    }
     default:
       systemPrompt = '你是一个提示词编辑器。输出必须仍然是提示词模板，不要执行任务。';
   }
@@ -165,7 +167,7 @@ async function executeNode(input: string, node: WorkflowNodeSnapshot, baseConfig
     case 'redteamer': {
       const r = await new RedTeamerAgent(cfg).execute(input);
       if (!r.success) throw new Error(r.error || 'RedTeamer 执行失败');
-      return { output: r.output };
+      return { output: r.output, keepInput: true };
     }
     case 'adapter': {
       const r = await new AdapterAgent(cfg).execute(input);
@@ -192,11 +194,9 @@ async function executeNode(input: string, node: WorkflowNodeSnapshot, baseConfig
         return { output: r.output, keepInput: true };
       }
     }
-    case 'prompt_shorten':
-    case 'prompt_expand':
-    case 'style_formal':
-    case 'style_casual': {
-      const out = await executeTransformNode(input, cfg, data.type);
+    case 'length_adjust':
+    case 'style_adjust': {
+      const out = await executeTransformNode(input, cfg, data);
       return { output: out };
     }
     case 'interactive': {
@@ -245,6 +245,16 @@ async function executeNode(input: string, node: WorkflowNodeSnapshot, baseConfig
       return { output: input, keepInput: true };
     }
   }
+}
+
+function summarizeRedTeamOutput(text: string): string {
+  if (!text) return '未得到红队分析结果';
+  const lines = text
+    .split('\n')
+    .map(line => line.replace(/^#+\s*/, '').replace(/^[-*]\s*/, '').replace(/^\d+\.\s*/, '').trim())
+    .filter(Boolean);
+  const summary = lines.join(' | ');
+  return summary || text.replace(/\s+/g, ' ').trim();
 }
 
 export function useGraphWorkflow() {
@@ -518,6 +528,11 @@ export function useGraphWorkflow() {
             `response <- ${n.data.type}: ${preview}${(res.output || '').length > 240 ? ' ...' : ''}`,
             n.data.type === 'judge' && !res.score ? 'warning' : 'success'
           );
+
+          if (n.data.type === 'redteamer' && res.output) {
+            const summary = summarizeRedTeamOutput(res.output);
+            appendLog('redteamer', `红队警示：${summary}`, 'error');
+          }
 
           if (res.score) {
             currentScore = res.score;

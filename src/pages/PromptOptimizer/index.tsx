@@ -100,7 +100,7 @@ export default function PromptOptimizer() {
                   onChange={(e) => setUserInput(e.target.value)}
                   placeholder="输入你的原始提示词..."
                   disabled={isRunning}
-                  autoSize={false}
+                  autoSize={true}
                   className="input-textarea"
                 />
               </div>

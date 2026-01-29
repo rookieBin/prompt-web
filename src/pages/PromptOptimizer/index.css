@@ -202,6 +202,50 @@
   height: 100%;
 }
 
+/* AntV X6 虚拟渲染区域内的虚线动画 */
+.optimizer-virtual-render {
+  position: relative;
+}
+
+@keyframes optimizerAnts {
+  to {
+    stroke-dashoffset: -100;
+  }
+}
+
+@keyframes optimizerDotsFlow {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+
+.optimizer-virtual-render .x6-edge path.marching-line {
+  animation: optimizerAnts 6s linear infinite;
+}
+
+.optimizer-virtual-render .x6-edge:hover path.marching-line {
+  stroke: #5f95ff;
+  stroke-width: 1.3px;
+}
+
+.optimizer-virtual-render .x6-edge:hover path.optimizer-edge-line--active {
+  stroke: #22C55E;
+  stroke-width: 3px;
+}
+
+.optimizer-virtual-render .x6-edge-selected path.marching-line,
+.optimizer-virtual-render .x6-edge path.optimizer-edge-line--active {
+  stroke: #22C55E;
+  stroke-width: 3px;
+}
+
+.optimizer-virtual-render .x6-node rect.optimizer-node-loader-ants {
+  transform-box: fill-box;
+  transform-origin: center;
+  stroke-dasharray: 12 6;
+  animation: optimizerDotsFlow 2.4s linear infinite;
+}
+
 .optimizer-node--running :global(.optimizer-node-glow) {
   animation: optimizerNodeGlowPulse 1.2s ease-in-out infinite;
 }

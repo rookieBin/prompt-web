@@ -349,11 +349,16 @@ const WorkflowCanvas = forwardRef<WorkflowCanvasHandle, WorkflowCanvasProps>(fun
         statusIconHtml = '<div style="width:18px;height:18px;display:flex;align-items:center;justify-content:center;color:#22C55E;font-size:16px;"><svg viewBox="64 64 896 896" width="16" height="16" fill="currentColor"><path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm193.5 301.7l-210.6 292a31.8 31.8 0 01-51.7 0L318.5 484.9c-3.8-5.3 0-12.7 6.5-12.7h46.9c10.2 0 19.9 4.9 25.9 13.3l71.2 98.8 157.2-218c6-8.3 15.6-13.3 25.9-13.3H699c6.5 0 10.3 7.4 6.5 12.7z"/></svg></div>';
       }
 
-      const statusClass = [
-        isActive && 'optimizer-node--running',
-        isCompleted && 'optimizer-node--completed',
-        isFailed && 'optimizer-node--failed',
-      ].filter(Boolean).join(' ');
+      const bodyClassNames = ['optimizer-node-body'];
+      if (isActive) {
+        bodyClassNames.push('optimizer-node--running', 'optimizer-node-body--running', 'optimizer-node-loader-ants');
+      }
+      if (isCompleted) {
+        bodyClassNames.push('optimizer-node--completed', 'optimizer-node-body--completed');
+      }
+      if (isFailed) {
+        bodyClassNames.push('optimizer-node--failed', 'optimizer-node-body--failed');
+      }
 
       // 设置节点样式
       node.setAttrs({
@@ -361,7 +366,7 @@ const WorkflowCanvas = forwardRef<WorkflowCanvasHandle, WorkflowCanvasProps>(fun
           opacity: isActive ? 1 : 0,
         },
         body: {
-          class: ['optimizer-node-body', statusClass].filter(Boolean).join(' '),
+          class: bodyClassNames.join(' '),
           fill: isFailed ? '#FEF2F2' : style.fill,
           stroke: isActive ? '#22C55E' : isFailed ? '#EF4444' : isSelected ? '#3B82F6' : style.stroke,
           strokeWidth: isActive || isFailed || isSelected ? 3 : 2,
@@ -410,6 +415,10 @@ const WorkflowCanvas = forwardRef<WorkflowCanvasHandle, WorkflowCanvasProps>(fun
       const isActiveEdge = activeIncoming.has(edge.id);
       const isFailedEdge = failedOutgoing.has(edge.id);
       const isSelectedEdge = selectedId === edge.id;
+      const lineClasses = ['optimizer-edge-line'];
+      if (isActiveEdge) {
+        lineClasses.push('optimizer-edge-line--active', 'marching-line');
+      }
       
       // 设置边的样式
       edge.setAttrs({
@@ -417,35 +426,32 @@ const WorkflowCanvas = forwardRef<WorkflowCanvasHandle, WorkflowCanvasProps>(fun
           stroke: isActiveEdge ? '#22C55E' : isFailedEdge ? '#EF4444' : isSelectedEdge ? '#3B82F6' : '#6B7280',
           strokeWidth: isActiveEdge || isFailedEdge || isSelectedEdge ? 3 : 2,
           strokeDasharray: isActiveEdge ? '8 4' : null,
+          strokeDashoffset: isActiveEdge ? 0 : null,
           targetMarker: {
             name: 'block',
             width: 12,
             height: 8,
             fill: isActiveEdge ? '#22C55E' : isFailedEdge ? '#EF4444' : isSelectedEdge ? '#3B82F6' : '#6B7280',
           },
+          class: lineClasses.join(' '),
         },
       });
-      
-      const edgeView = graph.findViewByCell(edge);
-      if (edgeView) {
-        const lineElem = edgeView.container.querySelector('.x6-edge-line') as SVGElement | null;
-        if (lineElem) {
-          if (isActiveEdge) {
-            lineElem.classList.add('x6-edge-line--active');
-          } else {
-            lineElem.classList.remove('x6-edge-line--active');
-          }
-        }
-      }
     });
   };
 
   useEffect(() => {
-    if (!containerRef.current) return;
-    if (graphRef.current) return;
+    const hostElement = containerRef.current;
+    if (!hostElement) return;
+
+    hostElement.classList.add('optimizer-virtual-render');
+    if (graphRef.current) {
+      return () => {
+        hostElement.classList.remove('optimizer-virtual-render');
+      };
+    }
 
     const graph = new Graph({
-      container: containerRef.current,
+      container: hostElement,
       background: { color: 'transparent' },
       grid: { size: 12, visible: true },
       autoResize: true,
@@ -640,6 +646,7 @@ const WorkflowCanvas = forwardRef<WorkflowCanvasHandle, WorkflowCanvasProps>(fun
       window.removeEventListener('keydown', handleKeyDown);
       graph.dispose();
       graphRef.current = null;
+      hostElement.classList.remove('optimizer-virtual-render');
     };
   }, [baseNodeConfig]);
 

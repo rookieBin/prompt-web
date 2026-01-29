@@ -170,7 +170,10 @@ async function executeNode(input: string, node: WorkflowNodeSnapshot, baseConfig
       return { output: r.output, keepInput: true };
     }
     case 'adapter': {
-      const r = await new AdapterAgent(cfg).execute(input);
+      const targetModel = typeof data.config.targetModel === 'string' && data.config.targetModel.trim().length > 0
+        ? data.config.targetModel.trim()
+        : undefined;
+      const r = await new AdapterAgent(cfg, targetModel).execute(input);
       if (!r.success) throw new Error(r.error || 'Adapter 执行失败');
       return { output: r.output };
     }

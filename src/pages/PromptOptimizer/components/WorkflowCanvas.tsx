@@ -3,6 +3,57 @@ import { Graph, Shape } from '@antv/x6';
 import { message } from 'antd';
 import { getLegacyEnglishLabel, getWorkflowNodeMeta } from '../types';
 import type { WorkflowNodeData, WorkflowNodeType, WorkflowSnapshot } from '../types';
+import { useTheme } from '@/contexts/ThemeContext';
+
+type ThemeName = 'light' | 'dark';
+
+type NodeVisualStyle = {
+  fill: string;
+  stroke: string;
+  titleColor: string;
+  descColor: string;
+};
+
+const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
+
+const NODE_STYLES: Record<WorkflowNodeType, Record<ThemeName, NodeVisualStyle>> = {
+  start: {
+    light: { fill: '#F3F4F6', stroke: '#9CA3AF', titleColor: '#111827', descColor: '#4B5563' },
+    dark: { fill: '#1F2937', stroke: '#9CA3AF', titleColor: '#F9FAFB', descColor: 'rgba(255,255,255,0.72)' },
+  },
+  architect: {
+    light: { fill: '#EEF2FF', stroke: '#6366F1', titleColor: '#1E1B4B', descColor: '#4C1D95' },
+    dark: { fill: '#312E81', stroke: '#C4B5FD', titleColor: '#F8F8FF', descColor: 'rgba(239, 233, 255, 0.78)' },
+  },
+  redteamer: {
+    light: { fill: '#FEF2F2', stroke: '#EF4444', titleColor: '#7F1D1D', descColor: '#991B1B' },
+    dark: { fill: '#7F1D1D', stroke: '#F87171', titleColor: '#FFF5F5', descColor: 'rgba(255, 239, 239, 0.8)' },
+  },
+  judge: {
+    light: { fill: '#FFFBEB', stroke: '#F59E0B', titleColor: '#78350F', descColor: '#B45309' },
+    dark: { fill: '#78350F', stroke: '#FCD34D', titleColor: '#FFFBEB', descColor: 'rgba(255, 247, 229, 0.82)' },
+  },
+  adapter: {
+    light: { fill: '#ECFDF5', stroke: '#10B981', titleColor: '#064E3B', descColor: '#047857' },
+    dark: { fill: '#064E3B', stroke: '#6EE7B7', titleColor: '#ECFDF5', descColor: 'rgba(209, 250, 229, 0.86)' },
+  },
+  length_adjust: {
+    light: { fill: '#F5F3FF', stroke: '#8B5CF6', titleColor: '#4C1D95', descColor: '#6D28D9' },
+    dark: { fill: '#3B0764', stroke: '#C084FC', titleColor: '#FBF4FF', descColor: 'rgba(248, 232, 255, 0.82)' },
+  },
+  style_adjust: {
+    light: { fill: '#EFF6FF', stroke: '#3B82F6', titleColor: '#1E3A8A', descColor: '#1D4ED8' },
+    dark: { fill: '#1E3A8A', stroke: '#93C5FD', titleColor: '#E0F2FE', descColor: 'rgba(219, 234, 254, 0.78)' },
+  },
+  interactive: {
+    light: { fill: '#F0F9FF', stroke: '#0EA5E9', titleColor: '#0C4A6E', descColor: '#0369A1' },
+    dark: { fill: '#083344', stroke: '#7DD3FC', titleColor: '#E0F2FE', descColor: 'rgba(207, 250, 254, 0.82)' },
+  },
+};
+
+function getNodeStyle(type: WorkflowNodeType, mode: ThemeName) {
+  return NODE_STYLES[type][mode];
+}
 
 export interface WorkflowCanvasHandle {
   addNode: (type: WorkflowNodeType) => void;
@@ -110,31 +161,6 @@ function ensureStartNode(graph: Graph, baseNodeConfig: any) {
   graph.addEdge({ source: { cell: start.id, port: 'out' }, target: { cell: target.id, port: 'in' } });
 }
 
-function getNodeStyle(type: WorkflowNodeType) {
-  switch (type) {
-    case 'start':
-      return { fill: '#F3F4F6', stroke: '#111827' };
-    case 'architect':
-      return { fill: '#EEF2FF', stroke: '#6366F1' };
-    case 'redteamer':
-      return { fill: '#FEF2F2', stroke: '#EF4444' };
-    case 'judge':
-      return { fill: '#FFFBEB', stroke: '#F59E0B' };
-    case 'adapter':
-      return { fill: '#ECFDF5', stroke: '#10B981' };
-    case 'length_adjust':
-      return { fill: '#F5F3FF', stroke: '#8B5CF6' };
-    case 'style_adjust':
-      return { fill: '#EFF6FF', stroke: '#3B82F6' };
-    case 'interactive':
-      return { fill: '#F0F9FF', stroke: '#0EA5E9' };
-    default: {
-      const _exhaustive: never = type;
-      return _exhaustive;
-    }
-  }
-}
-
 function createNodeData(type: WorkflowNodeType): WorkflowNodeData {
   const meta = getWorkflowNodeMeta(type);
   return {
@@ -196,6 +222,7 @@ const WorkflowCanvas = forwardRef<WorkflowCanvasHandle, WorkflowCanvasProps>(fun
   { activeNodeId, completedNodeIds, failedNodeId, onSelectNode }: WorkflowCanvasProps,
   ref
 ) {
+  const { theme } = useTheme();
   const containerRef = useRef<HTMLDivElement>(null);
   const graphRef = useRef<Graph | null>(null);
   const selectedCellIdRef = useRef<string | null>(null);
@@ -203,10 +230,16 @@ const WorkflowCanvas = forwardRef<WorkflowCanvasHandle, WorkflowCanvasProps>(fun
   const completedNodeIdsRef = useRef<string[]>([]);
   const failedNodeIdRef = useRef<string | null>(null);
   const onSelectNodeRef = useRef(onSelectNode);
+  const themeRef = useRef<ThemeName>(theme);
 
   useEffect(() => {
     onSelectNodeRef.current = onSelectNode;
   }, [onSelectNode]);
+
+  useEffect(() => {
+    themeRef.current = theme;
+    syncActiveStyle(activeNodeIdRef.current, completedNodeIdsRef.current, failedNodeIdRef.current);
+  }, [theme]);
 
   const baseNodeConfig = useMemo(
     () => ({
@@ -317,10 +350,11 @@ const WorkflowCanvas = forwardRef<WorkflowCanvasHandle, WorkflowCanvasProps>(fun
     if (!graph) return;
 
     const selectedId = selectedCellIdRef.current;
+    const currentTheme = themeRef.current;
 
     graph.getNodes().forEach((node: any) => {
       const data = node.getData() as WorkflowNodeData;
-      const style = getNodeStyle(data.type);
+      const style = getNodeStyle(data.type, currentTheme);
       const isActive = activeId === node.id;
       const isCompleted = completedIds.includes(node.id);
       const isFailed = failedId === node.id;
@@ -380,10 +414,12 @@ const WorkflowCanvas = forwardRef<WorkflowCanvasHandle, WorkflowCanvasProps>(fun
         title: {
           x: titleX,
           text: title,
+          fill: style.titleColor,
         },
         desc: {
           x: descX,
           text: desc,
+          fill: style.descColor,
         },
       });
 
@@ -655,7 +691,35 @@ const WorkflowCanvas = forwardRef<WorkflowCanvasHandle, WorkflowCanvasProps>(fun
     completedNodeIdsRef.current = completedNodeIds;
     failedNodeIdRef.current = failedNodeId ?? null;
     syncActiveStyle(activeNodeId, completedNodeIds, failedNodeId);
-  }, [activeNodeId, completedNodeIds, failedNodeId]);
+  }, [activeNodeId, completedNodeIds, failedNodeId, theme]);
+
+  const setAbsoluteZoom = (nextScale: number) => {
+    const graph = graphRef.current;
+    if (!graph) return;
+    const clamped = clamp(nextScale, 0.5, 2);
+    graph.zoom(clamped, { absolute: true });
+  };
+
+  const handleZoomIn = () => {
+    const graph = graphRef.current;
+    if (!graph) return;
+    const current = graph.zoom();
+    setAbsoluteZoom(current + 0.15);
+  };
+
+  const handleZoomOut = () => {
+    const graph = graphRef.current;
+    if (!graph) return;
+    const current = graph.zoom();
+    setAbsoluteZoom(current - 0.15);
+  };
+
+  const handleResetView = () => {
+    const graph = graphRef.current;
+    if (!graph) return;
+    graph.centerContent();
+    setAbsoluteZoom(1);
+  };
 
   useImperativeHandle(ref, () => ({
     addNode: (type: WorkflowNodeType) => {
@@ -664,7 +728,7 @@ const WorkflowCanvas = forwardRef<WorkflowCanvasHandle, WorkflowCanvasProps>(fun
 
       const center = graph.getGraphArea().getCenter();
       const data = createNodeData(type);
-      const style = getNodeStyle(type);
+      const style = getNodeStyle(type, themeRef.current);
       const meta = getWorkflowNodeMeta(type);
 
       const node = graph.addNode({
@@ -686,10 +750,12 @@ const WorkflowCanvas = forwardRef<WorkflowCanvasHandle, WorkflowCanvasProps>(fun
           title: {
             ...baseNodeConfig.attrs.title,
             text: data.label || meta.label,
+            fill: style.titleColor,
           },
           desc: {
             ...baseNodeConfig.attrs.desc,
             text: data.description || meta.description,
+            fill: style.descColor,
           },
         },
       });
@@ -729,7 +795,7 @@ const WorkflowCanvas = forwardRef<WorkflowCanvasHandle, WorkflowCanvasProps>(fun
       };
       node.setData(next);
 
-      const style = getNodeStyle(next.type);
+      const style = getNodeStyle(next.type, themeRef.current);
       const isActive = activeNodeId === nodeId;
       const meta = getWorkflowNodeMeta(next.type);
 
@@ -784,7 +850,40 @@ const WorkflowCanvas = forwardRef<WorkflowCanvasHandle, WorkflowCanvasProps>(fun
     },
   }));
 
-  return <div ref={containerRef} className="optimizer-workflow-canvas" />;
+  return (
+    <div className="workflow-canvas-wrapper">
+      <div className="workflow-canvas-controls">
+        <button
+          type="button"
+          className="workflow-canvas-control-btn"
+          onClick={handleResetView}
+          title="重置视图"
+          aria-label="重置视图"
+        >
+          ⌖
+        </button>
+        <button
+          type="button"
+          className="workflow-canvas-control-btn"
+          onClick={handleZoomIn}
+          title="放大"
+          aria-label="放大"
+        >
+          ＋
+        </button>
+        <button
+          type="button"
+          className="workflow-canvas-control-btn"
+          onClick={handleZoomOut}
+          title="缩小"
+          aria-label="缩小"
+        >
+          －
+        </button>
+      </div>
+      <div ref={containerRef} className="optimizer-workflow-canvas" />
+    </div>
+  );
 });
 
 export default WorkflowCanvas;

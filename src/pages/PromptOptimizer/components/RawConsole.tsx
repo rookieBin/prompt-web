@@ -27,7 +27,7 @@ export default function RawConsole({ logs }: RawConsoleProps) {
 
   return (
     <div className="raw-console">
-      <div className="raw-console-header">Console</div>
+      <div className="raw-console-header">控制台</div>
       <div ref={ref} className="raw-console-body">
         {lines.length === 0 ? (
           <div className="raw-console-empty">等待输出...</div>

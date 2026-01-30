@@ -231,6 +231,7 @@ const WorkflowCanvas = forwardRef<WorkflowCanvasHandle, WorkflowCanvasProps>(fun
   const failedNodeIdRef = useRef<string | null>(null);
   const onSelectNodeRef = useRef(onSelectNode);
   const themeRef = useRef<ThemeName>(theme);
+  const hasAutoCenteredRef = useRef(false);
 
   useEffect(() => {
     onSelectNodeRef.current = onSelectNode;
@@ -475,6 +476,39 @@ const WorkflowCanvas = forwardRef<WorkflowCanvasHandle, WorkflowCanvasProps>(fun
     });
   };
 
+  const setAbsoluteZoom = (nextScale: number) => {
+    const graph = graphRef.current;
+    if (!graph) return;
+    const clamped = clamp(nextScale, 0.5, 2);
+    graph.zoom(clamped, { absolute: true });
+  };
+
+  const autoCenterGraph = () => {
+    const graph = graphRef.current;
+    if (!graph) return;
+    if (!graph.getNodes().length) return;
+    graph.centerContent();
+    graph.zoom(1, { absolute: true });
+  };
+
+  const handleZoomIn = () => {
+    const graph = graphRef.current;
+    if (!graph) return;
+    const current = graph.zoom();
+    setAbsoluteZoom(current + 0.15);
+  };
+
+  const handleZoomOut = () => {
+    const graph = graphRef.current;
+    if (!graph) return;
+    const current = graph.zoom();
+    setAbsoluteZoom(current - 0.15);
+  };
+
+  const handleResetView = () => {
+    autoCenterGraph();
+  };
+
   useEffect(() => {
     const hostElement = containerRef.current;
     if (!hostElement) return;
@@ -678,6 +712,13 @@ const WorkflowCanvas = forwardRef<WorkflowCanvasHandle, WorkflowCanvasProps>(fun
 
     syncActiveStyle(activeNodeIdRef.current, completedNodeIdsRef.current, failedNodeIdRef.current);
 
+    if (!hasAutoCenteredRef.current) {
+      hasAutoCenteredRef.current = true;
+      requestAnimationFrame(() => {
+        autoCenterGraph();
+      });
+    }
+
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       graph.dispose();
@@ -692,34 +733,6 @@ const WorkflowCanvas = forwardRef<WorkflowCanvasHandle, WorkflowCanvasProps>(fun
     failedNodeIdRef.current = failedNodeId ?? null;
     syncActiveStyle(activeNodeId, completedNodeIds, failedNodeId);
   }, [activeNodeId, completedNodeIds, failedNodeId, theme]);
-
-  const setAbsoluteZoom = (nextScale: number) => {
-    const graph = graphRef.current;
-    if (!graph) return;
-    const clamped = clamp(nextScale, 0.5, 2);
-    graph.zoom(clamped, { absolute: true });
-  };
-
-  const handleZoomIn = () => {
-    const graph = graphRef.current;
-    if (!graph) return;
-    const current = graph.zoom();
-    setAbsoluteZoom(current + 0.15);
-  };
-
-  const handleZoomOut = () => {
-    const graph = graphRef.current;
-    if (!graph) return;
-    const current = graph.zoom();
-    setAbsoluteZoom(current - 0.15);
-  };
-
-  const handleResetView = () => {
-    const graph = graphRef.current;
-    if (!graph) return;
-    graph.centerContent();
-    setAbsoluteZoom(1);
-  };
 
   useImperativeHandle(ref, () => ({
     addNode: (type: WorkflowNodeType) => {

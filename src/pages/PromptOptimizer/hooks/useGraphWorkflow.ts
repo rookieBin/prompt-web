@@ -117,19 +117,27 @@ async function executeTransformNode(input: string, config: AIConfig, node: Workf
   const { type } = node;
 
   switch (type) {
-    case 'length_adjust': {
+    case 'expression_adjust': {
       const targetLength = typeof node.config.targetLength === 'number' && node.config.targetLength > 0
         ? node.config.targetLength
-        : 200;
-      systemPrompt = `你是一个提示词长度调整器。任务：保持意图不变，将提示词裁剪或扩写为约 ${targetLength} 字，确保结构和关键约束完整。输出必须仍然是提示词模板，不要执行任务。`;
-      break;
-    }
-    case 'style_adjust': {
-      const mode = node.config.styleMode === 'casual' ? 'casual' : 'formal';
-      systemPrompt =
-        mode === 'casual'
-          ? '你是一个提示词风格调整器。任务：保持内容不变，把提示词改写为更口语、更亲和但仍清晰可执行的风格。输出必须仍然是提示词模板，不要执行任务。'
-          : '你是一个提示词风格调整器。任务：保持内容不变，把提示词改写为更正式、更专业、更清晰的风格。输出必须仍然是提示词模板，不要执行任务。';
+        : undefined;
+      const styleMode = node.config.styleMode === 'casual' ? 'casual' : node.config.styleMode === 'formal' ? 'formal' : undefined;
+      const requirements: string[] = [];
+
+      if (targetLength) {
+        requirements.push(`将提示词裁剪或扩写为约 ${targetLength} 字，保持结构与关键约束完整`);
+      }
+      if (styleMode === 'casual') {
+        requirements.push('改写为更口语、更亲和但同样清晰可执行的语气');
+      } else if (styleMode === 'formal') {
+        requirements.push('改写为更正式、更专业、更清晰的语气');
+      }
+
+      const requirementText = requirements.length
+        ? requirements.join('；')
+        : '保持意图不变，对表达进行适度优化';
+
+      systemPrompt = `你是一个提示词表达调优器。任务：${requirementText}。输出必须仍然是提示词模板，不要执行任务。`;
       break;
     }
     default:
@@ -197,8 +205,7 @@ async function executeNode(input: string, node: WorkflowNodeSnapshot, baseConfig
         return { output: r.output, keepInput: true };
       }
     }
-    case 'length_adjust':
-    case 'style_adjust': {
+    case 'expression_adjust': {
       const out = await executeTransformNode(input, cfg, data);
       return { output: out };
     }

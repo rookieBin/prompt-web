@@ -61,23 +61,12 @@ const items: MenuProps['items'] = [
     ),
   },
   {
-    key: 'length_adjust',
+    key: 'expression_adjust',
     label: (
       <div>
-        <div>长度调整</div>
+        <div>表达调整</div>
         <div style={{ fontSize: 12, color: '#999', marginTop: 2 }}>
-          根据目标字数自动裁剪或扩写提示词
-        </div>
-      </div>
-    ),
-  },
-  {
-    key: 'style_adjust',
-    label: (
-      <div>
-        <div>风格调整</div>
-        <div style={{ fontSize: 12, color: '#999', marginTop: 2 }}>
-          选择目标语气并重写提示词风格
+          同时配置字数与语气，实现统一表达调优
         </div>
       </div>
     ),

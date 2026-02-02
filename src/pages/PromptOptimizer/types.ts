@@ -10,8 +10,7 @@ export type StyleAdjustMode = 'formal' | 'casual';
 export type WorkflowNodeType =
   | 'start'
   | AgentType
-  | 'length_adjust'
-  | 'style_adjust'
+  | 'expression_adjust'
   | 'interactive';
 
 export interface WorkflowNodeData {
@@ -44,10 +43,8 @@ export function getWorkflowNodeMeta(type: WorkflowNodeType): WorkflowNodeMeta {
       return { label: '评审官', description: '对提示词进行多维度评分和评审' };
     case 'adapter':
       return { label: '适配器', description: '对提示词进行最终的格式润色和优化' };
-    case 'length_adjust':
-      return { label: '长度调整', description: '根据目标字数自动裁剪或扩写提示词' };
-    case 'style_adjust':
-      return { label: '风格调整', description: '保持内容不变，选择目标语气并重写提示词' };
+    case 'expression_adjust':
+      return { label: '表达调整', description: '从不同维度微整提示词的表达方式' };
     case 'interactive':
       return { label: '多轮表单优化', description: '与用户多轮交互，收集信息并生成表单' };
     default: {

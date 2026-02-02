@@ -16,6 +16,11 @@ type NodeVisualStyle = {
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
+const LEGACY_NODE_STYLE_MAP: Record<string, WorkflowNodeType> = {
+  length_adjust: 'expression_adjust',
+  style_adjust: 'expression_adjust',
+};
+
 const NODE_STYLES: Record<WorkflowNodeType, Record<ThemeName, NodeVisualStyle>> = {
   start: {
     light: { fill: '#F3F4F6', stroke: '#9CA3AF', titleColor: '#111827', descColor: '#4B5563' },
@@ -37,13 +42,9 @@ const NODE_STYLES: Record<WorkflowNodeType, Record<ThemeName, NodeVisualStyle>> 
     light: { fill: '#ECFDF5', stroke: '#10B981', titleColor: '#064E3B', descColor: '#047857' },
     dark: { fill: '#064E3B', stroke: '#6EE7B7', titleColor: '#ECFDF5', descColor: 'rgba(209, 250, 229, 0.86)' },
   },
-  length_adjust: {
-    light: { fill: '#F5F3FF', stroke: '#8B5CF6', titleColor: '#4C1D95', descColor: '#6D28D9' },
-    dark: { fill: '#3B0764', stroke: '#C084FC', titleColor: '#FBF4FF', descColor: 'rgba(248, 232, 255, 0.82)' },
-  },
-  style_adjust: {
-    light: { fill: '#EFF6FF', stroke: '#3B82F6', titleColor: '#1E3A8A', descColor: '#1D4ED8' },
-    dark: { fill: '#1E3A8A', stroke: '#93C5FD', titleColor: '#E0F2FE', descColor: 'rgba(219, 234, 254, 0.78)' },
+  expression_adjust: {
+    light: { fill: '#FDF4FF', stroke: '#A855F7', titleColor: '#581C87', descColor: '#7E22CE' },
+    dark: { fill: '#3B0764', stroke: '#D946EF', titleColor: '#FAE8FF', descColor: 'rgba(248, 232, 255, 0.82)' },
   },
   interactive: {
     light: { fill: '#F0F9FF', stroke: '#0EA5E9', titleColor: '#0C4A6E', descColor: '#0369A1' },
@@ -51,8 +52,14 @@ const NODE_STYLES: Record<WorkflowNodeType, Record<ThemeName, NodeVisualStyle>> 
   },
 };
 
-function getNodeStyle(type: WorkflowNodeType, mode: ThemeName) {
-  return NODE_STYLES[type][mode];
+const FALLBACK_STYLE: Record<ThemeName, NodeVisualStyle> = {
+  light: { fill: '#F3F4F6', stroke: '#9CA3AF', titleColor: '#111827', descColor: '#4B5563' },
+  dark: { fill: '#1F2937', stroke: '#9CA3AF', titleColor: '#F9FAFB', descColor: 'rgba(255,255,255,0.72)' },
+};
+
+function getNodeStyle(type: WorkflowNodeType | string, mode: ThemeName) {
+  const resolvedType = (LEGACY_NODE_STYLE_MAP[type] ?? type) as WorkflowNodeType;
+  return NODE_STYLES[resolvedType]?.[mode] ?? FALLBACK_STYLE[mode];
 }
 
 export interface WorkflowCanvasHandle {
@@ -167,12 +174,7 @@ function createNodeData(type: WorkflowNodeType): WorkflowNodeData {
     type,
     label: meta.label,
     description: meta.description,
-    config:
-      type === 'style_adjust'
-        ? { styleMode: 'formal' }
-        : type === 'length_adjust'
-          ? { targetLength: 200 }
-          : {},
+    config: type === 'expression_adjust' ? { targetLength: 200, styleMode: 'formal' } : {},
   };
 }
 

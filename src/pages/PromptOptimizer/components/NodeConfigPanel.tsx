@@ -38,8 +38,7 @@ export default function NodeConfigPanel({ selected, onUpdate }: NodeConfigPanelP
   }, [form, selected]);
 
   const showTargetModel = selected?.data.type === 'adapter';
-  const showStyleMode = selected?.data.type === 'style_adjust';
-  const showTargetLength = selected?.data.type === 'length_adjust';
+  const showExpressionAdjust = selected?.data.type === 'expression_adjust';
 
   return (
     <Card
@@ -64,8 +63,8 @@ export default function NodeConfigPanel({ selected, onUpdate }: NodeConfigPanelP
             description: values.description,
             config: {
               ...(showTargetModel ? { targetModel: values.targetModel } : {}),
-              ...(showStyleMode ? { styleMode: values.styleMode } : {}),
-              ...(showTargetLength ? { targetLength: values.targetLength } : {}),
+              ...(showExpressionAdjust ? { styleMode: values.styleMode } : {}),
+              ...(showExpressionAdjust ? { targetLength: values.targetLength } : {}),
             },
           });
         }}
@@ -102,21 +101,22 @@ export default function NodeConfigPanel({ selected, onUpdate }: NodeConfigPanelP
           </Form.Item>
         )}
 
-        {showStyleMode && (
-          <Form.Item label="语气风格" name="styleMode" rules={[{ required: true, message: '请选择风格' }]}>
-            <Select
-              options={[
-                { label: '更正式（Formal）', value: 'formal' },
-                { label: '更口语（Casual）', value: 'casual' },
-              ]}
-            />
-          </Form.Item>
-        )}
-
-        {showTargetLength && (
-          <Form.Item label="预期文字长度" name="targetLength" rules={[{ required: true, message: '请输入长度' }]}>
-            <InputNumber min={50} max={4000} placeholder="例如 300" style={{ width: '100%' }} />
-          </Form.Item>
+        {showExpressionAdjust && (
+          <>
+            <Form.Item label="语气风格" name="styleMode">
+              <Select
+                allowClear
+                placeholder="选择是否需要调整语气"
+                options={[
+                  { label: '更正式（Formal）', value: 'formal' },
+                  { label: '更口语（Casual）', value: 'casual' },
+                ]}
+              />
+            </Form.Item>
+            <Form.Item label="预期文字长度" name="targetLength">
+              <InputNumber min={50} max={4000} placeholder="例如 300（可选）" style={{ width: '100%' }} />
+            </Form.Item>
+          </>
         )}
       </Form>
     </Card>

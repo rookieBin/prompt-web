@@ -9,7 +9,7 @@ import {
   BulbOutlined,
   ToolOutlined,
 } from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import type { User } from '../../types';
 import { userApi } from '../../api';
@@ -29,6 +29,7 @@ export default function AppLayout({ children }: LayoutProps) {
   const [addPromptVisible, setAddPromptVisible] = useState(false);
   const { theme, themeMode, setThemeMode } = useTheme();
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     loadUser();
@@ -57,7 +58,7 @@ export default function AppLayout({ children }: LayoutProps) {
             type="text"
             icon={<HomeOutlined />}
             onClick={() => navigate('/')}
-            className="header-button"
+            className={`header-button ${location.pathname === '/' ? 'active' : ''}`}
           >
             <span style={{ marginLeft: 8 }}>首页</span>
           </Button>
@@ -66,7 +67,7 @@ export default function AppLayout({ children }: LayoutProps) {
               type="text"
               icon={<BulbOutlined />}
               onClick={() => navigate('/optimizer')}
-              className="header-button"
+              className={`header-button ${location.pathname === '/optimizer' ? 'active' : ''}`}
             >
               <span style={{ marginLeft: 8 }}>提示词优化</span>
             </Button>
@@ -76,7 +77,7 @@ export default function AppLayout({ children }: LayoutProps) {
               type="text"
               icon={<ToolOutlined />}
               onClick={() => navigate('/workshop')}
-              className="header-button"
+              className={`header-button ${location.pathname === '/workshop' ? 'active' : ''}`}
             >
               <span style={{ marginLeft: 8 }}>提示词工坊</span>
             </Button>
@@ -102,8 +103,8 @@ export default function AppLayout({ children }: LayoutProps) {
             />
           </Tooltip>
           <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
-            <Avatar 
-              src={user?.avatar} 
+            <Avatar
+              src={user?.avatar}
               icon={<UserOutlined />}
               style={{ cursor: 'pointer', marginLeft: 16 }}
             />

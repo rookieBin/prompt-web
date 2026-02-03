@@ -140,7 +140,7 @@ export default function PromptSquare() {
                 <h2 className="section-title">推荐</h2>
               </div>
               <div className="prompt-list">
-                {recommendedPrompts.slice(0, 6).map(prompt => {
+                {recommendedPrompts.slice(0, 3).map(prompt => {
                   const popoverId = `recommended-${prompt.id}`;
                   return (
                     <Popover
@@ -195,7 +195,7 @@ export default function PromptSquare() {
                 <h2 className="section-title">热门</h2>
               </div>
               <div className="prompt-list">
-                {hotPrompts.slice(0, 6).map(prompt => {
+                {hotPrompts.slice(0, 3).map(prompt => {
                   const popoverId = `hot-${prompt.id}`;
                   return (
                     <Popover

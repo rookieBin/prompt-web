@@ -88,6 +88,11 @@
   transform: translateY(1px);
 }
 
+.header-button.active {
+  background: var(--ai-gradient) !important;
+  color: #fff !important;
+}
+
 
 .app-sider {
   background: var(--bg-container) !important;

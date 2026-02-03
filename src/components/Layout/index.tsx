@@ -84,7 +84,7 @@ export default function AppLayout({ children }: LayoutProps) {
           </Tooltip>
         </div>
         <div className="header-right">
-          <span className="app-title">WePrompt</span>
+          {/* <span className="app-title">WePrompt</span> */}
           <Tooltip title={theme === 'dark' ? '切换到亮色模式' : '切换到暗色模式'}>
             <Button
               type="text"

@@ -21,13 +21,17 @@ export interface User {
   email?: string;
 }
 
-// AI配置类型
+// AI配置类型（支持多配置管理）
 export interface AIConfig {
+  id: string;              // 配置ID
+  name: string;            // 配置名称
   apiKey: string;
   baseURL: string;
   model: string;
   temperature?: number;
   maxTokens?: number;
+  isActive?: boolean;      // 是否为当前激活配置
+  createdAt?: string;      // 创建时间
 }
 
 // 消息类型（用于AI对话）
@@ -93,6 +97,7 @@ export interface WorkshopTemplate {
   name: string;
   content: string;                      // 包含 {{variable}} 的模板内容
   selections: Record<string, string>;   // 变量选择值，key为 "变量名-索引"
+  userId?: string;                      // 所属用户ID
   createdAt: string;
   updatedAt: string;
 }

@@ -1,11 +1,11 @@
-import type { 
-  Prompt, 
-  User, 
-  AIConfig, 
-  Message, 
-  ApiResponse, 
-  PaginationParams, 
-  PaginationResponse 
+import type {
+  Prompt,
+  User,
+  AIConfig,
+  Message,
+  ApiResponse,
+  PaginationParams,
+  PaginationResponse
 } from '../types';
 
 // API基础配置 - 方便后续对接后端时修改
@@ -80,9 +80,9 @@ export const promptApi = {
   getPrompts: async (params: PaginationParams): Promise<ApiResponse<PaginationResponse<Prompt>>> => {
     const stored = localStorage.getItem('prompts');
     let allPrompts: Prompt[] = stored ? JSON.parse(stored) : getMockPrompts();
-    
+
     const { page, pageSize, category, keyword } = params;
-    
+
     // 按分类筛选
     if (category && category !== 'all') {
       allPrompts = allPrompts.filter(p => {
@@ -90,7 +90,7 @@ export const promptApi = {
         return promptCategory === category;
       });
     }
-    
+
     // 按关键词搜索
     if (keyword) {
       const lowerKeyword = keyword.toLowerCase();
@@ -100,11 +100,11 @@ export const promptApi = {
         p.tags.some(tag => tag.toLowerCase().includes(lowerKeyword))
       );
     }
-    
+
     const start = (page - 1) * pageSize;
     const end = start + pageSize;
     const list = allPrompts.slice(start, end);
-    
+
     return {
       code: 200,
       message: 'success',
@@ -121,12 +121,12 @@ export const promptApi = {
   getRecommendedPrompts: async (): Promise<ApiResponse<Prompt[]>> => {
     const stored = localStorage.getItem('prompts');
     const allPrompts: Prompt[] = stored ? JSON.parse(stored) : getMockPrompts();
-    
+
     // 模拟推荐算法：返回收藏数最多的前6个
     const recommended = [...allPrompts]
       .sort((a, b) => b.favoriteCount - a.favoriteCount)
       .slice(0, 6);
-    
+
     return {
       code: 200,
       message: 'success',
@@ -138,12 +138,12 @@ export const promptApi = {
   getHotPrompts: async (): Promise<ApiResponse<Prompt[]>> => {
     const stored = localStorage.getItem('prompts');
     const allPrompts: Prompt[] = stored ? JSON.parse(stored) : getMockPrompts();
-    
+
     // 模拟热门算法：返回查看数最多的前6个
     const hot = [...allPrompts]
       .sort((a, b) => b.viewCount - a.viewCount)
       .slice(0, 6);
-    
+
     return {
       code: 200,
       message: 'success',
@@ -156,7 +156,7 @@ export const promptApi = {
     const stored = localStorage.getItem('prompts');
     const prompts: Prompt[] = stored ? JSON.parse(stored) : getMockPrompts();
     const prompt = prompts.find(p => p.id === id);
-    
+
     if (!prompt) {
       return {
         code: 404,
@@ -180,7 +180,7 @@ export const promptApi = {
   createPrompt: async (prompt: Omit<Prompt, 'id' | 'viewCount' | 'favoriteCount' | 'createdAt' | 'updatedAt'>): Promise<ApiResponse<Prompt>> => {
     const stored = localStorage.getItem('prompts');
     const prompts: Prompt[] = stored ? JSON.parse(stored) : getMockPrompts();
-    
+
     const newPrompt: Prompt = {
       ...prompt,
       id: Date.now().toString(),
@@ -205,7 +205,7 @@ export const promptApi = {
     const stored = localStorage.getItem('prompts');
     const prompts: Prompt[] = stored ? JSON.parse(stored) : getMockPrompts();
     const prompt = prompts.find(p => p.id === id);
-    
+
     if (!prompt) {
       return {
         code: 404,
@@ -216,7 +216,7 @@ export const promptApi = {
 
     const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
     const index = favorites.indexOf(id);
-    
+
     if (index > -1) {
       favorites.splice(index, 1);
       prompt.favoriteCount = Math.max(0, prompt.favoriteCount - 1);
@@ -239,6 +239,71 @@ export const promptApi = {
   isFavorited: (id: string): boolean => {
     const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
     return favorites.includes(id);
+  },
+
+  // 获取我创建的提示词
+  getMyPrompts: async (userId: string): Promise<ApiResponse<Prompt[]>> => {
+    const stored = localStorage.getItem('prompts');
+    const allPrompts: Prompt[] = stored ? JSON.parse(stored) : getMockPrompts();
+    const myPrompts = allPrompts.filter(p => p.authorId === userId);
+
+    return {
+      code: 200,
+      message: 'success',
+      data: myPrompts,
+    };
+  },
+
+  // 更新提示词
+  updatePrompt: async (id: string, data: Partial<Prompt>): Promise<ApiResponse<Prompt>> => {
+    const stored = localStorage.getItem('prompts');
+    const prompts: Prompt[] = stored ? JSON.parse(stored) : getMockPrompts();
+    const index = prompts.findIndex(p => p.id === id);
+
+    if (index === -1) {
+      return {
+        code: 404,
+        message: 'Prompt not found',
+        data: {} as Prompt,
+      };
+    }
+
+    prompts[index] = {
+      ...prompts[index],
+      ...data,
+      updatedAt: new Date().toISOString(),
+    };
+    localStorage.setItem('prompts', JSON.stringify(prompts));
+
+    return {
+      code: 200,
+      message: 'success',
+      data: prompts[index],
+    };
+  },
+
+  // 删除提示词
+  deletePrompt: async (id: string): Promise<ApiResponse<null>> => {
+    const stored = localStorage.getItem('prompts');
+    const prompts: Prompt[] = stored ? JSON.parse(stored) : getMockPrompts();
+    const index = prompts.findIndex(p => p.id === id);
+
+    if (index === -1) {
+      return {
+        code: 404,
+        message: 'Prompt not found',
+        data: null,
+      };
+    }
+
+    prompts.splice(index, 1);
+    localStorage.setItem('prompts', JSON.stringify(prompts));
+
+    return {
+      code: 200,
+      message: 'success',
+      data: null,
+    };
   },
 };
 
@@ -279,28 +344,103 @@ export const userApi = {
   },
 };
 
-// AI配置相关API
+// AI配置相关API（支持多配置管理）
 export const aiConfigApi = {
-  // 获取AI配置
-  getConfig: (): AIConfig | null => {
-    const stored = localStorage.getItem('aiConfig');
-    return stored ? JSON.parse(stored) : null;
+  // 获取所有配置
+  getConfigs: (): AIConfig[] => {
+    const stored = localStorage.getItem('aiConfigs');
+    return stored ? JSON.parse(stored) : [];
   },
 
-  // 保存AI配置
-  saveConfig: (config: AIConfig): void => {
-    localStorage.setItem('aiConfig', JSON.stringify(config));
+  // 获取当前激活配置
+  getActiveConfig: (): AIConfig | null => {
+    const configs = aiConfigApi.getConfigs();
+    const active = configs.find(c => c.isActive);
+    if (active) return active;
+    // 如果没有激活配置，返回第一个
+    return configs.length > 0 ? configs[0] : null;
   },
 
-  // 获取默认配置
-  getDefaultConfig: (): AIConfig => {
+  // 保存配置（新增或更新）
+  saveConfig: (config: AIConfig): AIConfig => {
+    const configs = aiConfigApi.getConfigs();
+    const index = configs.findIndex(c => c.id === config.id);
+
+    if (index === -1) {
+      // 新增配置
+      const newConfig = {
+        ...config,
+        id: config.id || Date.now().toString(),
+        createdAt: new Date().toISOString(),
+      };
+      // 如果是第一个配置，自动激活
+      if (configs.length === 0) {
+        newConfig.isActive = true;
+      }
+      configs.push(newConfig);
+      localStorage.setItem('aiConfigs', JSON.stringify(configs));
+      return newConfig;
+    } else {
+      // 更新配置
+      configs[index] = { ...configs[index], ...config };
+      localStorage.setItem('aiConfigs', JSON.stringify(configs));
+      return configs[index];
+    }
+  },
+
+  // 删除配置
+  deleteConfig: (id: string): boolean => {
+    const configs = aiConfigApi.getConfigs();
+    const index = configs.findIndex(c => c.id === id);
+    if (index === -1) return false;
+
+    const wasActive = configs[index].isActive;
+    configs.splice(index, 1);
+
+    // 如果删除的是激活配置，自动激活第一个
+    if (wasActive && configs.length > 0) {
+      configs[0].isActive = true;
+    }
+
+    localStorage.setItem('aiConfigs', JSON.stringify(configs));
+    return true;
+  },
+
+  // 设置激活配置
+  setActiveConfig: (id: string): boolean => {
+    const configs = aiConfigApi.getConfigs();
+    let found = false;
+
+    configs.forEach(c => {
+      if (c.id === id) {
+        c.isActive = true;
+        found = true;
+      } else {
+        c.isActive = false;
+      }
+    });
+
+    if (found) {
+      localStorage.setItem('aiConfigs', JSON.stringify(configs));
+    }
+    return found;
+  },
+
+  // 获取默认配置模板
+  getDefaultConfig: (): Omit<AIConfig, 'id' | 'createdAt'> => {
     return {
+      name: '默认配置',
       apiKey: '',
       baseURL: 'https://api.openai.com/v1',
       model: 'gpt-4',
       temperature: 0.7,
       maxTokens: 2000,
     };
+  },
+
+  // 兼容旧版：获取配置（返回激活配置）
+  getConfig: (): AIConfig | null => {
+    return aiConfigApi.getActiveConfig();
   },
 };
 
@@ -446,13 +586,13 @@ function getCategoryByTags(tags: string[]): string {
     design: ['设计', 'UI', 'UX'],
     data: ['数据分析', '数据'],
   };
-  
+
   for (const [category, keywords] of Object.entries(categoryMap)) {
     if (tags.some(tag => keywords.some(keyword => tag.includes(keyword)))) {
       return category;
     }
   }
-  
+
   return 'other';
 }
 

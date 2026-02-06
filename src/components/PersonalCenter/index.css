@@ -43,37 +43,37 @@
   border-radius: 10px;
 }
 
-.sidebar :global(.ant-menu) {
+.sidebar .ant-menu {
   background: transparent;
-  border-inline-end: none;
-}
-
-/* 强制覆盖 AntD 运行时生成的 Menu 右边框 */
-.sidebar :global(.ant-menu-light.ant-menu-root.ant-menu-inline),
-.sidebar :global(.ant-menu-light > .ant-menu.ant-menu-root.ant-menu-inline),
-.sidebar :global(.ant-menu-light.ant-menu-root.ant-menu-vertical),
-.sidebar :global(.ant-menu-light > .ant-menu.ant-menu-root.ant-menu-vertical) {
   border-inline-end: none !important;
 }
 
-.sidebar :global(.ant-menu-item) {
+/* 强制覆盖 AntD 运行时生成的 Menu 右边框 */
+.sidebar .ant-menu-light.ant-menu-root.ant-menu-inline,
+.sidebar .ant-menu-light>.ant-menu.ant-menu-root.ant-menu-inline,
+.sidebar .ant-menu-light.ant-menu-root.ant-menu-vertical,
+.sidebar .ant-menu-light>.ant-menu.ant-menu-root.ant-menu-vertical {
+  border-inline-end: none !important;
+}
+
+.personal-center-modal .sidebar .ant-menu-item {
   color: var(--text-color);
-  margin: 4px 12px;
+  margin: 8px 0;
   border-radius: 8px;
   transition: all 0.3s ease;
 }
 
-.sidebar :global(.ant-menu-item-selected) {
-  background: var(--ai-gradient);
-  color: white;
+.personal-center-modal .sidebar .ant-menu-item-selected {
+  background: var(--ai-gradient) !important;
+  color: white !important;
 }
 
-.sidebar :global(.ant-menu-item:hover:not(.ant-menu-item-selected)) {
-  background: var(--bg-base);
-  color: var(--ai-purple);
+.personal-center-modal .sidebar .ant-menu-item:hover:not(.ant-menu-item-selected) {
+  background: var(--bg-base) !important;
+  color: var(--ai-purple) !important;
 }
 
-.sidebar :global(.ant-menu-item-icon) {
+.personal-center-modal .sidebar .ant-menu-item .ant-menu-item-icon {
   color: inherit;
 }
 
@@ -82,10 +82,6 @@
   padding: 24px;
   overflow-y: auto;
   color: var(--text-color);
-}
-
-.section {
-  max-width: 600px;
 }
 
 .section h3 {

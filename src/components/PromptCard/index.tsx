@@ -1,4 +1,4 @@
-import { memo, useState } from 'react';
+import { memo, useState, useEffect } from 'react';
 import { Tag, Button, Space, message } from 'antd';
 import {
   EyeOutlined,
@@ -14,7 +14,7 @@ import './index.css';
 interface PromptCardProps {
   prompt: Prompt;
   loading?: boolean;
-  isFavorited: boolean;
+  isFavorited?: boolean; // 改为可选
   onUse: (prompt: Prompt) => void;
   onFavorite: (prompt: Prompt) => void;
   disableHover?: boolean;
@@ -23,12 +23,25 @@ interface PromptCardProps {
 function PromptCardComponent({
   prompt,
   loading,
-  isFavorited,
+  isFavorited: externalIsFavorited,
   onUse,
   onFavorite,
   disableHover = false,
 }: PromptCardProps) {
   const [copied, setCopied] = useState(false);
+  const [internalIsFavorited, setInternalIsFavorited] = useState<boolean | undefined>(() => {
+    if (externalIsFavorited !== undefined) return externalIsFavorited;
+    return prompt.favorited;
+  });
+
+  // 当外部值变化时同步更新内部状态
+  useEffect(() => {
+    if (externalIsFavorited !== undefined) {
+      setInternalIsFavorited(externalIsFavorited);
+      return;
+    }
+    setInternalIsFavorited(prompt.favorited);
+  }, [externalIsFavorited, prompt.favorited]);
 
   const handleCopy = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -99,8 +112,8 @@ function PromptCardComponent({
         </Button>
         <Button
           type="text"
-          className={`action-btn ${isFavorited ? 'favorited' : ''}`}
-          icon={isFavorited ? <HeartFilled /> : <HeartOutlined />}
+          className={`action-btn ${internalIsFavorited === true ? 'favorited' : ''}`}
+          icon={internalIsFavorited === true ? <HeartFilled /> : <HeartOutlined />}
           onClick={() => onFavorite(prompt)}
         >
           收藏
@@ -127,6 +140,7 @@ const arePropsEqual = (
     prev.description === next.description &&
     prev.viewCount === next.viewCount &&
     prev.favoriteCount === next.favoriteCount &&
+    prev.favorited === next.favorited &&
     prevProps.isFavorited === nextProps.isFavorited &&
     prevProps.loading === nextProps.loading
   );

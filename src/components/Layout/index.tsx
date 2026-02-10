@@ -9,8 +9,9 @@ import {
   BulbOutlined,
   ToolOutlined,
 } from '@ant-design/icons';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useAuth } from '../../contexts/AuthContext';
 import type { User } from '../../types';
 import { userApi } from '../../api';
 import PersonalCenter from '../PersonalCenter';
@@ -20,7 +21,7 @@ import './index.css';
 const { Header, Content } = Layout;
 
 interface LayoutProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 export default function AppLayout({ children }: LayoutProps) {
@@ -28,6 +29,7 @@ export default function AppLayout({ children }: LayoutProps) {
   const [personalCenterVisible, setPersonalCenterVisible] = useState(false);
   const [addPromptVisible, setAddPromptVisible] = useState(false);
   const { theme, themeMode, setThemeMode } = useTheme();
+  const { isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -47,6 +49,14 @@ export default function AppLayout({ children }: LayoutProps) {
       key: 'personal',
       label: '个人中心',
       onClick: () => setPersonalCenterVisible(true),
+    },
+    {
+      key: 'logout',
+      label: '退出登录',
+      onClick: () => {
+        logout();
+        navigate('/login');
+      },
     },
   ];
 
@@ -102,18 +112,29 @@ export default function AppLayout({ children }: LayoutProps) {
               style={{ marginLeft: 16, color: 'inherit' }}
             />
           </Tooltip>
-          <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
-            <Avatar
-              src={user?.avatar}
-              icon={<UserOutlined />}
-              style={{ cursor: 'pointer', marginLeft: 16 }}
-            />
-          </Dropdown>
+          {isAuthenticated ? (
+            <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
+              <Avatar
+                src={user?.avatar}
+                icon={<UserOutlined />}
+                style={{ cursor: 'pointer', marginLeft: 16 }}
+              />
+            </Dropdown>
+          ) : (
+            <>
+              <Button type="link" onClick={() => navigate('/login')} style={{ marginLeft: 16 }}>
+                登录
+              </Button>
+              <Button type="primary" onClick={() => navigate('/register')} style={{ marginLeft: 8 }}>
+                注册
+              </Button>
+            </>
+          )}
         </div>
       </Header>
       <Layout>
         <Content className="app-content">
-          {children}
+          {children ?? <Outlet />}
         </Content>
       </Layout>
       <PersonalCenter

@@ -94,20 +94,35 @@ export default function PromptSquare() {
     setChatModalVisible(true);
   };
 
+  const applyFavoriteUpdate = (id: string, favorited: boolean) => {
+    const update = (list: Prompt[]) =>
+      list.map((p) => {
+        if (p.id !== id) return p;
+        const prevFavorited = Boolean(p.favorited);
+        const delta = favorited === prevFavorited ? 0 : favorited ? 1 : -1;
+        return {
+          ...p,
+          favorited,
+          favoriteCount: Math.max(0, (p.favoriteCount ?? 0) + delta),
+        };
+      });
+
+    setPrompts(update);
+    setRecommendedPrompts(update);
+    setHotPrompts(update);
+  };
+
   const handleFavorite = async (prompt: Prompt) => {
     try {
       const response = await promptApi.toggleFavorite(prompt.id);
       if (response.code === 200) {
         message.success(response.data.favorited ? '已收藏' : '已取消收藏');
+        applyFavoriteUpdate(prompt.id, response.data.favorited);
         loadPrompts();
       }
     } catch (error) {
       message.error('操作失败');
     }
-  };
-
-  const isFavorited = (id: string) => {
-    return promptApi.isFavorited(id);
   };
 
   return (
@@ -150,7 +165,6 @@ export default function PromptSquare() {
                           <PromptCard
                             prompt={prompt}
                             loading={false}
-                            isFavorited={isFavorited(prompt.id)}
                             onUse={(p) => {
                               handleUse(p);
                               setPopoverVisible({ ...popoverVisible, [popoverId]: false });
@@ -205,7 +219,6 @@ export default function PromptSquare() {
                           <PromptCard
                             prompt={prompt}
                             loading={false}
-                            isFavorited={isFavorited(prompt.id)}
                             onUse={(p) => {
                               handleUse(p);
                               setPopoverVisible({ ...popoverVisible, [popoverId]: false });
@@ -270,7 +283,6 @@ export default function PromptSquare() {
               key={prompt.id}
               prompt={prompt}
               loading={loading}
-              isFavorited={isFavorited(prompt.id)}
               onUse={handleUse}
               onFavorite={handleFavorite}
             />

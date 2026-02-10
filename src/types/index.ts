@@ -9,6 +9,7 @@ export interface Prompt {
   tags: string[];
   viewCount: number;
   favoriteCount: number;
+  favorited?: boolean;
   createdAt: string;
   updatedAt: string;
 }
